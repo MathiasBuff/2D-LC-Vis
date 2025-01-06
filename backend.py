@@ -5,6 +5,7 @@ import logging
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from pathlib import Path
 from tkinter.filedialog import askdirectory
 
@@ -52,16 +53,50 @@ def main():
     )
     
     # going back 1 index might be bug
-    for n in range(len(time_column_D1)):
+    for n in range(1, len(time_column_D1)):
         array_start = n * rows_per_column
         array_end = (n + 1) * rows_per_column + 1
         
         array = input_values[array_start : array_end]
         value_matrix = np.vstack((value_matrix, array))
     
-    value_matrix = np.transpose(value_matrix)
-    print(value_matrix.shape)
-    print(value_matrix)
+    # value_matrix = np.transpose(value_matrix)
+    
+    # print(time_column_D1.shape)
+    # print(time_column_D2.shape)
+    # print(value_matrix.shape)
+    
+    # plt.contourf(time_column_D2, time_column_D1, value_matrix)
+    # plt.show()
+    
+    fig1, ax2 = plt.subplots(layout='constrained')
+    cmap = plt.colormaps["inferno"]\
+        .with_extremes(under="black", over="white")
+    CS = ax2.contourf(
+        time_column_D2,
+        time_column_D1,
+        value_matrix,
+        range(-10, 130, 20),
+        cmap=cmap
+        )
+    
+    CS.cmap.set_under()
+    CS.cmap.set_over("white")
+
+    # Note that in the following, we explicitly pass in a subset of the contour
+    # levels used for the filled contours.  Alternatively, we could pass in
+    # additional levels to provide extra resolution, or leave out the *levels*
+    # keyword argument to use all of the original levels.
+
+    ax2.set_title("Example Contour Plot")
+    ax2.set_xlabel("D2 Time [s]")
+    ax2.set_ylabel("D1 Time [min]")
+
+    # Make a colorbar for the ContourSet returned by the contourf call.
+    cbar = fig1.colorbar(CS)
+    cbar.ax.set_ylabel("Value")
+    
+    plt.show()
 
 if __name__ == "__main__":
     print(" \n")
