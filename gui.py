@@ -34,12 +34,6 @@ class GraphPage(tk.Frame):
         for child in self.winfo_children():
             child.destroy()
 
-class MPLGraph(Figure):
-    def __init__(self):
-        Figure.__init__(self, figsize=(5, 5), dpi=100)
-        self.plot = self.add_subplot(111)
-        self.plot.plot([1, 2, 3, 4, 5, 6, 7], [4, 3, 5, 0, 2, 0, 6])
-
 class CentralWindow(tk.Toplevel):
     def __init__(self, master: tk.Tk):
         super().__init__(master)
