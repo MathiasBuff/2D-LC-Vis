@@ -25,7 +25,7 @@ def main():
 
     value_matrix = construct_matrix(input_values, ax_D1, ax_D2)
     
-    plot(ax_D2, ax_D1, value_matrix, range(5, 100, 1))
+    get_figure_contour(ax_D2, ax_D1, value_matrix, range(5, 100, 1))
     
 
 def load_data(path, sheet, headers) -> np.ndarray:
@@ -86,7 +86,8 @@ def construct_matrix(
     
     return matrix
 
-def plot(x, y, z, levels):
+# TODO: Variables on levels, cmap, and axes
+def get_figure_contour(x, y, z, levels):
     fig1, ax2 = plt.subplots(layout='constrained')
     cmap = plt.colormaps["gist_rainbow"]\
         .with_extremes(under="black", over="white")
@@ -107,7 +108,7 @@ def plot(x, y, z, levels):
     cbar = fig1.colorbar(CS)
     cbar.ax.set_ylabel("Value")
     
-    plt.show()
+    return fig1
 
 if __name__ == "__main__":
     print(" \n")

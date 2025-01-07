@@ -2,16 +2,43 @@
 
 import logging
 import time
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
 import tkinter as tk
 from tkinter import ttk
 
-from backend import load_data, construct_axes, construct_matrix, plot
+from backend import load_data, construct_axes, construct_matrix, get_figure_contour
 from opendialog import ask_file
+
 
 # Use root logger so that all modules can access it
 logger = logging.getLogger()
 
 PADDINGS = {"padx": 10, "pady": 10}
+
+class GraphPage(tk.Frame):
+
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.pack()
+        self.mpl_canvas = FigureCanvasTkAgg(None, self)
+
+    def add_mpl_figure(self, fig):
+        self.mpl_canvas = FigureCanvasTkAgg(fig, self)
+        self.mpl_canvas.draw()
+        self.mpl_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def _clear(self):
+        for child in self.winfo_children():
+            child.destroy()
+
+class MPLGraph(Figure):
+    def __init__(self):
+        Figure.__init__(self, figsize=(5, 5), dpi=100)
+        self.plot = self.add_subplot(111)
+        self.plot.plot([1, 2, 3, 4, 5, 6, 7], [4, 3, 5, 0, 2, 0, 6])
 
 class CentralWindow(tk.Toplevel):
     def __init__(self, master: tk.Tk):
@@ -39,19 +66,20 @@ class CentralWindow(tk.Toplevel):
         self.geometry(f"{windowWidth}x{windowHeight}+{xCoordinate}+{yCoordinate}")
         # self.resizable(False, False)
 
-        self.frame1 = ttk.Labelframe(self, text="Calculation Conditions")
-        self.frame2 = ttk.Labelframe(self, text="Log output")
-        self.frame1.grid(column=0, row=1, sticky="nsew", **PADDINGS)
-        self.frame2.grid(column=2, row=0, rowspan=2, sticky="nsew", **PADDINGS)
+        self.calc_frame = ttk.Labelframe(self, text="Calculation Conditions")
+        self.output_note = ttk.Notebook(self)
+        self.calc_frame.grid(column=0, row=1, sticky="nsew", **PADDINGS)
+        self.output_note.grid(column=2, row=0, rowspan=2, sticky="nsew", **PADDINGS)
         ttk.Separator(self, orient="vertical").grid(
             column=1, row=0, rowspan=2, sticky="ns", **PADDINGS
         )
+        self.rowconfigure(1, weight=1)
         
         self.load_btn = ttk.Button(self, text="Load Excel File", command=self.load)
         self.load_btn.grid(column=0, row=0, sticky="nsew", **PADDINGS)
 
-        st_frame = ttk.Frame(self.frame1)
-        shift_frame = ttk.Frame(self.frame1)
+        st_frame = ttk.Frame(self.calc_frame)
+        shift_frame = ttk.Frame(self.calc_frame)
 
         st_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
         shift_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
@@ -71,15 +99,12 @@ class CentralWindow(tk.Toplevel):
         self.shift_entry.insert(tk.END, "Not Implemented")
         self.shift_entry['state'] = "disabled"
         
-        blank_frame = ttk.Frame(self.frame1)
+        blank_frame = ttk.Frame(self.calc_frame)
         blank_frame.pack(side="top", expand=True, fill="both", **PADDINGS)
         
         self.blk_checkbox = ttk.Checkbutton(blank_frame)
         self.blk_checkbox.grid(column=0, row=0)
-        
-        # Invoke twice to set "off", otherwise state is weird at launch
-        self.blk_checkbox.invoke()
-        self.blk_checkbox.invoke()
+        self.blk_checkbox.state(["!alternate"])
         
         ttk.Label(blank_frame, text="Blank Substraction", anchor="w").grid(
             column=1, row=0, sticky="nsew"
@@ -93,8 +118,26 @@ class CentralWindow(tk.Toplevel):
         
         blank_frame.columnconfigure(1, weight=1)
         
-        self.process_btn = ttk.Button(self.frame1, text="Process Data", command=self.process)
+        self.process_btn = ttk.Button(self.calc_frame, text="Process Data", command=self.process)
         self.process_btn.pack(side="top", expand=False, fill="both", **PADDINGS)
+        
+        self.output_contour = ttk.LabelFrame(self.output_note, text="Contour Plot")
+        self.output_contour.pack(fill='both', expand=True)
+        self.output_note.add(self.output_contour, text="Contour")
+        
+        self.output_3d = ttk.LabelFrame(self.output_note, text="3D Plot")
+        self.output_3d.pack(fill='both', expand=True)
+        self.output_note.add(self.output_3d, text="3D Plot")
+        
+        self.output_overlay = ttk.LabelFrame(self.output_note, text="2D Overlay")
+        self.output_overlay.pack(fill='both', expand=True)
+        self.output_note.add(self.output_overlay, text="2D Overlay")
+        
+        self.output_raw = ttk.LabelFrame(self.output_note, text="2D Raw")
+        self.output_raw.pack(fill='both', expand=True)
+        self.output_note.add(self.output_raw, text="2D Raw")
+                
+        self.graph_page = GraphPage(self.output_contour)
         
         return
 
@@ -122,7 +165,14 @@ class CentralWindow(tk.Toplevel):
         print(self.ax_D1, self.ax_D2)
         print(self.value_matrix.shape)
         
-        plot(self.ax_D2, self.ax_D1, self.value_matrix, range(5, 100, 1))
+        fig = get_figure_contour(
+            self.ax_D2,
+            self.ax_D1,
+            self.value_matrix,
+            range(5, 100, 5)
+        )
+        self.graph_page._clear()
+        self.graph_page.add_mpl_figure(fig)
         return
 
     def on_exit(self, event=None):
