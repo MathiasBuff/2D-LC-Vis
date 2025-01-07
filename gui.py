@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import logging
-import threading
 import time
 import tkinter as tk
 from tkinter import ttk
+
+from backend import load_data, construct_axes, construct_matrix, plot
+from opendialog import ask_file
 
 # Use root logger so that all modules can access it
 logger = logging.getLogger()
@@ -17,17 +19,14 @@ class CentralWindow(tk.Toplevel):
 
         self.master = master
         master.withdraw()
+        
+        self.data = None
 
         self.body()
         self.bind("<Control-q>", self.on_exit)
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
 
     def body(self):
-
-        # theme set in class unncessary dependency ?
-        # self.tk.call("source", r"Azure-ttk-theme-main\azure.tcl")
-        # self.tk.call("set_theme", "dark")
-
         self.iconbitmap(default=r"graphics\unige-icon.ico")
         self.title("2D-LC Chromatogram Visualization")
 
@@ -40,45 +39,90 @@ class CentralWindow(tk.Toplevel):
         self.geometry(f"{windowWidth}x{windowHeight}+{xCoordinate}+{yCoordinate}")
         # self.resizable(False, False)
 
-        menu = tk.Menu(self)
-        self.config(menu=menu)
-
-        file_menu = tk.Menu(menu)
-        # dev_menu = tk.Menu(menu)
-
-        menu.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="Open")
-        file_menu.add_cascade(label="Save")
-
-        # menu.add_cascade(label="Dev", menu=dev_menu)
-        # dev_menu.add_command(label="Test", command=self.test)
-
         self.frame1 = ttk.Labelframe(self, text="Calculation Conditions")
         self.frame2 = ttk.Labelframe(self, text="Log output")
-        self.frame1.grid(column=0, row=0, sticky="nsew", **PADDINGS)
-        self.frame2.grid(column=2, row=0, sticky="nsew", **PADDINGS)
+        self.frame1.grid(column=0, row=1, sticky="nsew", **PADDINGS)
+        self.frame2.grid(column=2, row=0, rowspan=2, sticky="nsew", **PADDINGS)
         ttk.Separator(self, orient="vertical").grid(
             column=1, row=0, rowspan=2, sticky="ns", **PADDINGS
         )
-
-        topframe = ttk.Frame(self.frame1)
-        botframe = ttk.Frame(self.frame1)
-
-        topframe.pack(side="top", expand="no", fill="both", **PADDINGS)
-        botframe.pack(side="top", expand="no", fill="both", **PADDINGS)
-
-        ttk.Label(topframe, text="Sampling time (min) :", anchor="w", width=20).pack(
-            side="left", fill="x", expand="no"
-        )
-        ttk.Label(botframe, text="Time shift (s) :", anchor="w", width=20).pack(
-            side="left", fill="x", expand="no"
-        )
-
-        self.usr = ttk.Entry(topframe)
-        self.usr.pack(side="right", fill="x", expand="yes")
-        self.pwd = ttk.Entry(botframe)
-        self.pwd.pack(side="right", fill="x", expand="yes")
         
+        self.load_btn = ttk.Button(self, text="Load Excel File", command=self.load)
+        self.load_btn.grid(column=0, row=0, sticky="nsew", **PADDINGS)
+
+        st_frame = ttk.Frame(self.frame1)
+        shift_frame = ttk.Frame(self.frame1)
+
+        st_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
+        shift_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
+
+        ttk.Label(st_frame, text="Sampling time (min) :", anchor="w", width=20).pack(
+            side="left", fill="x", expand=False
+        )
+        ttk.Label(shift_frame, text="Time shift (s) :", anchor="w", width=20).pack(
+            side="left", fill="x", expand=False
+        )
+
+        self.st_entry = ttk.Entry(st_frame)
+        self.st_entry.pack(side="right", fill="x", expand="yes")
+        self.shift_entry = ttk.Entry(shift_frame)
+        self.shift_entry.pack(side="right", fill="x", expand="yes")
+        
+        self.shift_entry.insert(tk.END, "Not Implemented")
+        self.shift_entry['state'] = "disabled"
+        
+        blank_frame = ttk.Frame(self.frame1)
+        blank_frame.pack(side="top", expand=True, fill="both", **PADDINGS)
+        
+        self.blk_checkbox = ttk.Checkbutton(blank_frame)
+        self.blk_checkbox.grid(column=0, row=0)
+        
+        # Invoke twice to set "off", otherwise state is weird at launch
+        self.blk_checkbox.invoke()
+        self.blk_checkbox.invoke()
+        
+        ttk.Label(blank_frame, text="Blank Substraction", anchor="w").grid(
+            column=1, row=0, sticky="nsew"
+        )
+        
+        self.blk_entry = ttk.Entry(blank_frame)
+        self.blk_entry.grid(column=1, row=1, sticky="nsew")
+        
+        self.blk_entry.insert(tk.END, "Not Implemented")
+        self.blk_entry['state'] = "disabled"
+        
+        blank_frame.columnconfigure(1, weight=1)
+        
+        self.process_btn = ttk.Button(self.frame1, text="Process Data", command=self.process)
+        self.process_btn.pack(side="top", expand=False, fill="both", **PADDINGS)
+        
+        return
+
+    def load(self):
+        file_parameters = ask_file()
+        self.data = load_data(
+            file_parameters["path"],
+            file_parameters["sheet"],
+            file_parameters["headers"],
+        )
+        print("data loaded.")
+    
+    def process(self):
+        self.ax_D1, self.ax_D2 = construct_axes(
+            self.data[:, 0],
+            float(self.st_entry.get()),
+        )
+        
+        self.value_matrix = construct_matrix(
+            self.data[:, 1],
+            self.ax_D1,
+            self.ax_D2,
+        )
+        
+        print(self.ax_D1, self.ax_D2)
+        print(self.value_matrix.shape)
+        
+        plot(self.ax_D2, self.ax_D1, self.value_matrix, range(5, 100, 1))
         return
 
     def on_exit(self, event=None):

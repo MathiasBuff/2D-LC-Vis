@@ -8,6 +8,15 @@ from tkinter import ttk
 from gui import CentralWindow
 
 def main():
+    # Logging configuration
+    logging.basicConfig(
+        filename="runtime.log",
+        filemode="w",
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)-8s - %(name)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    
     # Add permanent trace as backup log
     trace_log = Path("var", "trace.log")
     trace_handler = logging.FileHandler(trace_log, "a")

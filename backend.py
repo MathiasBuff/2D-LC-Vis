@@ -1,31 +1,52 @@
 #!/usr/bin/env python3
 
-from ast import TypeVarTuple
 import logging
-import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
-from tkinter.filedialog import askdirectory
+import tkinter as tk
+from tkinter import ttk
+from tkinter.filedialog import askopenfilename
 
 logger = logging.getLogger(__name__)
 
 def main():
-    # TODO replace constants with user-input variables
-    filepath = Path("data", "24-12-17-2D-Data_(peptides et Davy).xlsx")
-    sheetname = "Feuil1"
+    
     sampling_time = 0.5078
+    # sampling_time = 0.42
     
     #TODO make header optional with checkbox on load
-    data = np.array(pd.read_excel(filepath, sheetname, header=0))
+    data = load_data()
+    
     input_time, input_values = data[:, 0], data[:, 1]
+ 
+    ax_D1, ax_D2 = construct_axes(input_time, sampling_time)
+
+    value_matrix = construct_matrix(input_values, ax_D1, ax_D2)
+    
+    plot(ax_D2, ax_D1, value_matrix, range(5, 100, 1))
+    
+
+def load_data(path, sheet, headers) -> np.ndarray:
+    if headers:
+        h = 0
+    else:
+        h = None
+    return np.array(pd.read_excel(path, sheet, header=h))
+
+def construct_axes(
+    time_data: np.ndarray,
+    sampling_time: float
+) -> tuple[np.ndarray, np.ndarray]:
+    
+    input_time = time_data
     
     x_start = input_time[0]
     x_end = input_time[-1]
     delta = (x_end - x_start) / (len(input_time) - 1)
-    frequency = 1 / (60 * delta)
-    
+    # frequency = 1 / (60 * delta)
+        
     # reindex time to prevent rounding errors
     input_time = np.arange(
         start=0,
@@ -33,66 +54,56 @@ def main():
         step=delta
     )
     
-    rows_per_column = round(frequency * sampling_time * 60)
     time_column_D2 = np.arange(
         start=0,
         stop=sampling_time + delta,
         step=delta
     )
-    time_column_D2 = time_column_D2[:rows_per_column + 1]
     time_column_D2 *= 60 # Convert to seconds
     
-    # initialise the value matrix with first column
-    value_matrix = np.array(input_values[:rows_per_column + 1])
-    
-    end_time_D1 = int(x_end / sampling_time) * sampling_time
     time_column_D1 = np.arange(
         start=0,
-        stop=end_time_D1,
+        stop=x_end - (2 * sampling_time),
         step=sampling_time
     )
     
-    # going back 1 index might be bug
-    for n in range(1, len(time_column_D1)):
-        array_start = n * rows_per_column
-        array_end = (n + 1) * rows_per_column + 1
+    return (time_column_D1, time_column_D2)
+
+# FIXME: need more robustness on the matrix construction
+def construct_matrix(
+    values: np.ndarray,
+    ax_D1: np.ndarray,
+    ax_D2: np.ndarray
+) -> np.ndarray:
+    matrix = np.array(values[:len(ax_D2)])
         
-        array = input_values[array_start : array_end]
-        value_matrix = np.vstack((value_matrix, array))
+    for n in range(1, len(ax_D1)):
+        array_start = n * len(ax_D2) - int(1.2*n)
+        array_end = (n + 1) * len(ax_D2) - int(1.2*n)
+        
+        array = values[array_start : array_end]
+        matrix = np.vstack((matrix, array))
     
-    # value_matrix = np.transpose(value_matrix)
-    
-    # print(time_column_D1.shape)
-    # print(time_column_D2.shape)
-    # print(value_matrix.shape)
-    
-    # plt.contourf(time_column_D2, time_column_D1, value_matrix)
-    # plt.show()
-    
+    return matrix
+
+def plot(x, y, z, levels):
     fig1, ax2 = plt.subplots(layout='constrained')
-    cmap = plt.colormaps["inferno"]\
+    cmap = plt.colormaps["gist_rainbow"]\
         .with_extremes(under="black", over="white")
+
     CS = ax2.contourf(
-        time_column_D2,
-        time_column_D1,
-        value_matrix,
-        range(-10, 130, 20),
-        cmap=cmap
+        x,
+        y,
+        z,
+        levels,
+        cmap=cmap,
+        extend="both"
         )
     
-    CS.cmap.set_under()
-    CS.cmap.set_over("white")
-
-    # Note that in the following, we explicitly pass in a subset of the contour
-    # levels used for the filled contours.  Alternatively, we could pass in
-    # additional levels to provide extra resolution, or leave out the *levels*
-    # keyword argument to use all of the original levels.
-
     ax2.set_title("Example Contour Plot")
     ax2.set_xlabel("D2 Time [s]")
     ax2.set_ylabel("D1 Time [min]")
 
-    # Make a colorbar for the ContourSet returned by the contourf call.
     cbar = fig1.colorbar(CS)
     cbar.ax.set_ylabel("Value")
     
