@@ -88,11 +88,11 @@ def construct_matrix(
 
 # TODO: Variables on levels, cmap, and axes
 def get_figure_contour(x, y, z, levels):
-    fig1, ax2 = plt.subplots(layout='constrained')
+    figure, axes = plt.subplots(layout='constrained')
     cmap = plt.colormaps["gist_rainbow"]\
         .with_extremes(under="black", over="white")
 
-    CS = ax2.contourf(
+    contour_set = axes.contourf(
         x,
         y,
         z,
@@ -101,14 +101,13 @@ def get_figure_contour(x, y, z, levels):
         extend="both"
         )
     
-    ax2.set_title("Example Contour Plot")
-    ax2.set_xlabel("D2 Time [s]")
-    ax2.set_ylabel("D1 Time [min]")
+    axes.set_xlabel("D2 Time [s]")
+    axes.set_ylabel("D1 Time [min]")
 
-    cbar = fig1.colorbar(CS)
+    cbar = figure.colorbar(contour_set)
     cbar.ax.set_ylabel("Value")
     
-    return fig1
+    return figure
 
 if __name__ == "__main__":
     print(" \n")

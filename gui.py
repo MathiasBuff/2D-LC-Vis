@@ -2,8 +2,11 @@
 
 import logging
 import time
+import numpy as np
 import matplotlib
+import matplotlib.pyplot
 matplotlib.use('TkAgg')
+import matplotlib.axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import tkinter as tk
@@ -22,7 +25,6 @@ class GraphPage(tk.Frame):
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.pack()
         self.mpl_canvas = FigureCanvasTkAgg(None, self)
 
     def add_mpl_figure(self, fig):
@@ -33,6 +35,78 @@ class GraphPage(tk.Frame):
     def _clear(self):
         for child in self.winfo_children():
             child.destroy()
+
+class ContourGraph(Figure):
+
+    def __init__(
+        self,
+        x:np.ndarray,
+        y:np.ndarray,
+        z:np.ndarray,
+        limits_x: tuple[float, float] | None = None,
+        limits_y: tuple[float, float] | None = None,
+        limits_z: tuple[float, float] | None = None,
+    ):
+        Figure.__init__(self)
+        self.add_subplot(111)
+        axes = self.axes[0]
+        
+        cmap = matplotlib.pyplot.colormaps["jet"].with_extremes(under="white", over="magenta")
+        if limits_z == None:
+            limits_z = (z.min(), z.max())
+            
+        if limits_x != None:
+            limits_x = axes.set_xlim(limits_x)
+        if limits_y != None:
+            limits_y = axes.set_ylim(limits_y)
+            
+        levels = np.linspace(limits_z[0], limits_z[1], 100)
+        self.cs = axes.contourf(x, y, z, levels, cmap=cmap, extend="both")
+        
+        self.cbar = self.colorbar(self.cs)
+        
+class XYZGraph(Figure):
+
+    def __init__(
+        self,
+        x:np.ndarray,
+        y:np.ndarray,
+        z:np.ndarray,
+        limits_x: tuple[float, float] | None = None,
+        limits_y: tuple[float, float] | None = None,
+        limits_z: tuple[float, float] | None = None,
+    ):
+        Figure.__init__(self)
+        self.add_subplot(111, projection="3d")
+        axes = self.axes[0]
+        
+        cmap = matplotlib.pyplot.colormaps["jet"]
+        if limits_z == None:
+            limits_z = (z.min(), z.max())
+        levels = np.linspace(limits_z[0], limits_z[1], 100)
+        self.cs = axes.contour(x, y, z, levels, cmap=cmap, extend="both")
+        
+        self.cbar = self.colorbar(self.cs)
+        
+class OverlayGraph(Figure):
+
+    def __init__(self, x, y, z):
+        Figure.__init__(self)
+        self.add_subplot(111)
+        axes = self.axes[0]
+        
+        for line in z:
+            axes.plot(x, line)
+        
+
+class RawGraph(Figure):
+
+    def __init__(self, x, y):
+        Figure.__init__(self)
+        self.add_subplot(111)
+        axes = self.axes[0]
+        axes.plot(x, y)
+        
 
 class CentralWindow(tk.Toplevel):
     def __init__(self, master: tk.Tk):
@@ -94,7 +168,7 @@ class CentralWindow(tk.Toplevel):
         self.shift_entry['state'] = "disabled"
         
         blank_frame = ttk.Frame(self.calc_frame)
-        blank_frame.pack(side="top", expand=True, fill="both", **PADDINGS)
+        blank_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
         
         self.blk_checkbox = ttk.Checkbutton(blank_frame)
         self.blk_checkbox.grid(column=0, row=0)
@@ -119,9 +193,9 @@ class CentralWindow(tk.Toplevel):
         self.output_contour.pack(fill='both', expand=True)
         self.output_note.add(self.output_contour, text="Contour")
         
-        self.output_3d = ttk.LabelFrame(self.output_note, text="3D Plot")
-        self.output_3d.pack(fill='both', expand=True)
-        self.output_note.add(self.output_3d, text="3D Plot")
+        self.output_xyz = ttk.LabelFrame(self.output_note, text="3D Plot")
+        self.output_xyz.pack(fill='both', expand=True)
+        self.output_note.add(self.output_xyz, text="3D Plot")
         
         self.output_overlay = ttk.LabelFrame(self.output_note, text="2D Overlay")
         self.output_overlay.pack(fill='both', expand=True)
@@ -131,7 +205,37 @@ class CentralWindow(tk.Toplevel):
         self.output_raw.pack(fill='both', expand=True)
         self.output_note.add(self.output_raw, text="2D Raw")
                 
-        self.graph_page = GraphPage(self.output_contour)
+        self.contour_graph = GraphPage(self.output_contour)
+        self.xyz_graph = GraphPage(self.output_xyz)
+        self.overlay_graph = GraphPage(self.output_overlay)
+        self.raw_graph = GraphPage(self.output_raw)
+        
+        self.contour_graph.grid(column=0, row=0, columnspan=7)
+        self.xyz_graph.grid(column=0, row=0, columnspan=7)
+        self.overlay_graph.grid(column=0, row=0, columnspan=7)
+        self.raw_graph.grid(column=0, row=0, columnspan=7)
+        
+        ttk.Label(self.output_contour, text="X min:", width=10, anchor="e").grid(column=0, row=1, sticky="w")
+        self.output_contour.x_min = ttk.Entry(self.output_contour, width=5)
+        self.output_contour.x_min.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=5)
+        ttk.Label(self.output_contour, text="Y min:", width=10, anchor="e").grid(column=2, row=1, sticky="w")
+        self.output_contour.y_min = ttk.Entry(self.output_contour, width=5)
+        self.output_contour.y_min.grid(column=3, row=1, sticky="w", padx=(0, 10), pady=5)
+        ttk.Label(self.output_contour, text="Z min:", width=10, anchor="e").grid(column=4, row=1, sticky="w")
+        self.output_contour.z_min = ttk.Entry(self.output_contour, width=5)
+        self.output_contour.z_min.grid(column=5, row=1, sticky="w", padx=(0, 10), pady=5)
+        
+        ttk.Label(self.output_contour, text="X max:", width=10, anchor="e").grid(column=0, row=2, sticky="w")
+        self.output_contour.x_max = ttk.Entry(self.output_contour, width=5)
+        self.output_contour.x_max.grid(column=1, row=2, sticky="w", padx=(0, 10), pady=5)
+        ttk.Label(self.output_contour, text="Y max:", width=10, anchor="e").grid(column=2, row=2, sticky="w")
+        self.output_contour.y_max = ttk.Entry(self.output_contour, width=5)
+        self.output_contour.y_max.grid(column=3, row=2, sticky="w", padx=(0, 10), pady=5)
+        ttk.Label(self.output_contour, text="Z max:", width=10, anchor="e").grid(column=4, row=2, sticky="w")
+        self.output_contour.z_max = ttk.Entry(self.output_contour, width=5)
+        self.output_contour.z_max.grid(column=5, row=2, sticky="w", padx=(0, 10), pady=5)
+        
+        self.output_contour.columnconfigure(6, weight=1)
         
         return
 
@@ -155,18 +259,55 @@ class CentralWindow(tk.Toplevel):
             self.ax_D1,
             self.ax_D2,
         )
-        
-        print(self.ax_D1, self.ax_D2)
-        print(self.value_matrix.shape)
-        
-        fig = get_figure_contour(
+
+        try:
+            limits_x = (float(self.output_contour.x_min.get()), float(self.output_contour.x_max.get()))
+        except:
+            limits_x = None
+        try:
+            limits_y = (float(self.output_contour.y_min.get()), float(self.output_contour.y_max.get()))
+        except:
+            limits_y = None
+        try:
+            limits_z = (float(self.output_contour.z_min.get()), float(self.output_contour.z_max.get()))
+        except:
+            limits_z = None
+
+        fig_contour = ContourGraph(
             self.ax_D2,
             self.ax_D1,
             self.value_matrix,
-            range(5, 100, 5)
+            limits_x=limits_x,
+            limits_y=limits_y,
+            limits_z=limits_z,
         )
-        self.graph_page._clear()
-        self.graph_page.add_mpl_figure(fig)
+        
+        fig_xyz = XYZGraph(
+            self.ax_D2,
+            self.ax_D1,
+            self.value_matrix
+        )
+        
+        fig_overlay = OverlayGraph(
+            self.ax_D2,
+            self.ax_D1,
+            self.value_matrix
+        )
+        
+        fig_raw = RawGraph(
+            self.data[:, 0],
+            self.data[:, 1]
+        )
+        
+        self.contour_graph._clear()
+        self.xyz_graph._clear()
+        self.overlay_graph._clear()
+        self.raw_graph._clear()
+        
+        self.contour_graph.add_mpl_figure(fig_contour)
+        self.xyz_graph.add_mpl_figure(fig_xyz)
+        self.overlay_graph.add_mpl_figure(fig_overlay)
+        self.raw_graph.add_mpl_figure(fig_raw)
         return
 
     def on_exit(self, event=None):

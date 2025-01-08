@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
-import tkinter as tk
 import pandas as pd
 from pathlib import Path
-from tkinter import messagebox, ttk
+from tkinter import ttk
 from tkinter.simpledialog import Dialog
 from tkinter.filedialog import askopenfilename
 
 
 class OpenExcelDialog(Dialog):
-
-    """Class to open a file opening dialog.
+    """Class to create a Excel File opening dialog.
     """
 
     def __init__(self, parent=None, title: str | None = "Open Excel File"):
@@ -109,9 +107,7 @@ class OpenExcelDialog(Dialog):
 
 
 def ask_file() -> dict:
-    """get credentials from a user
-
-    return value is a tuple of strings: (user, password)
+    """get file parameters (path, sheetname, has_headers) from a user
     """
     l = OpenExcelDialog()
     return l.result

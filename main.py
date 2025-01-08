@@ -12,22 +12,11 @@ def main():
     logging.basicConfig(
         filename="runtime.log",
         filemode="w",
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s - %(levelname)-8s - %(name)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    
-    # Add permanent trace as backup log
-    trace_log = Path("var", "trace.log")
-    trace_handler = logging.FileHandler(trace_log, "a")
-    # trace_handler.setFormatter(
-    #     logging.Formatter(
-    #         "%(asctime)s - %(levelname)-8s - %(message)s",
-    #         datefmt="%Y-%m-%d %H:%M:%S",
-    #     )
-    # )
     logger = logging.getLogger()
-    logger.addHandler(trace_handler)
 
     # Create root application window and then hide it
     root = tk.Tk()
@@ -41,7 +30,7 @@ def main():
     root.style.theme_use("azure-light")
     
     # Launch the main window of the application
-    logger.debug("Starting up application.\n")
+    logger.info("Starting up application.\n")
     CentralWindow(root)
 
     root.mainloop()
