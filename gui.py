@@ -191,6 +191,15 @@ class CentralWindow(tk.Toplevel):
             self.ax_D2,
         )
 
+        self.draw_contour()
+        self.draw_xyz()
+        self.draw_overlay()
+        self.draw_raw()    
+        
+        return
+
+
+    def draw_contour(self):
         try:
             limits_x = (float(self.output_contour.x_min.get()), float(self.output_contour.x_max.get()))
         except:
@@ -213,33 +222,45 @@ class CentralWindow(tk.Toplevel):
             limits_z=limits_z,
         )
         
+        self.contour_graph._clear()
+        self.contour_graph.add_mpl_figure(fig_contour)
+        
+        return fig_contour
+
+    def draw_xyz(self):
         fig_xyz = XYZGraph(
             self.ax_D2,
             self.ax_D1,
             self.value_matrix
         )
         
+        self.xyz_graph._clear()
+        self.xyz_graph.add_mpl_figure(fig_xyz)
+        
+        return fig_xyz
+
+    def draw_overlay(self):
         fig_overlay = OverlayGraph(
             self.ax_D2,
             self.ax_D1,
             self.value_matrix
         )
         
+        self.overlay_graph._clear()
+        self.overlay_graph.add_mpl_figure(fig_overlay)
+        
+        return fig_overlay
+
+    def draw_raw(self):
         fig_raw = RawGraph(
             self.data[:, 0],
             self.data[:, 1]
         )
         
-        self.contour_graph._clear()
-        self.xyz_graph._clear()
-        self.overlay_graph._clear()
         self.raw_graph._clear()
-        
-        self.contour_graph.add_mpl_figure(fig_contour)
-        self.xyz_graph.add_mpl_figure(fig_xyz)
-        self.overlay_graph.add_mpl_figure(fig_overlay)
         self.raw_graph.add_mpl_figure(fig_raw)
-        return
+        
+        return fig_raw
 
     def on_exit(self, event=None):
         logger.debug("Exiting application.\n")
