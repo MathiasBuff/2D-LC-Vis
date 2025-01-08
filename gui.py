@@ -2,18 +2,17 @@
 
 import logging
 import time
-import numpy as np
 import matplotlib
 import matplotlib.pyplot
 matplotlib.use('TkAgg')
 import matplotlib.axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from matplotlib.figure import Figure
 import tkinter as tk
 from tkinter import ttk
 
 from backend import load_data, construct_axes, construct_matrix, get_figure_contour
 from opendialog import ask_file
+from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph
 
 
 # Use root logger so that all modules can access it
@@ -36,77 +35,6 @@ class GraphPage(tk.Frame):
         for child in self.winfo_children():
             child.destroy()
 
-class ContourGraph(Figure):
-
-    def __init__(
-        self,
-        x:np.ndarray,
-        y:np.ndarray,
-        z:np.ndarray,
-        limits_x: tuple[float, float] | None = None,
-        limits_y: tuple[float, float] | None = None,
-        limits_z: tuple[float, float] | None = None,
-    ):
-        Figure.__init__(self)
-        self.add_subplot(111)
-        axes = self.axes[0]
-        
-        cmap = matplotlib.pyplot.colormaps["jet"].with_extremes(under="white", over="magenta")
-        if limits_z == None:
-            limits_z = (z.min(), z.max())
-            
-        if limits_x != None:
-            limits_x = axes.set_xlim(limits_x)
-        if limits_y != None:
-            limits_y = axes.set_ylim(limits_y)
-            
-        levels = np.linspace(limits_z[0], limits_z[1], 100)
-        self.cs = axes.contourf(x, y, z, levels, cmap=cmap, extend="both")
-        
-        self.cbar = self.colorbar(self.cs)
-        
-class XYZGraph(Figure):
-
-    def __init__(
-        self,
-        x:np.ndarray,
-        y:np.ndarray,
-        z:np.ndarray,
-        limits_x: tuple[float, float] | None = None,
-        limits_y: tuple[float, float] | None = None,
-        limits_z: tuple[float, float] | None = None,
-    ):
-        Figure.__init__(self)
-        self.add_subplot(111, projection="3d")
-        axes = self.axes[0]
-        
-        cmap = matplotlib.pyplot.colormaps["jet"]
-        if limits_z == None:
-            limits_z = (z.min(), z.max())
-        levels = np.linspace(limits_z[0], limits_z[1], 100)
-        self.cs = axes.contour(x, y, z, levels, cmap=cmap, extend="both")
-        
-        self.cbar = self.colorbar(self.cs)
-        
-class OverlayGraph(Figure):
-
-    def __init__(self, x, y, z):
-        Figure.__init__(self)
-        self.add_subplot(111)
-        axes = self.axes[0]
-        
-        for line in z:
-            axes.plot(x, line)
-        
-
-class RawGraph(Figure):
-
-    def __init__(self, x, y):
-        Figure.__init__(self)
-        self.add_subplot(111)
-        axes = self.axes[0]
-        axes.plot(x, y)
-        
 
 class CentralWindow(tk.Toplevel):
     def __init__(self, master: tk.Tk):
@@ -210,10 +138,10 @@ class CentralWindow(tk.Toplevel):
         self.overlay_graph = GraphPage(self.output_overlay)
         self.raw_graph = GraphPage(self.output_raw)
         
-        self.contour_graph.grid(column=0, row=0, columnspan=7)
-        self.xyz_graph.grid(column=0, row=0, columnspan=7)
-        self.overlay_graph.grid(column=0, row=0, columnspan=7)
-        self.raw_graph.grid(column=0, row=0, columnspan=7)
+        self.contour_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
+        self.xyz_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
+        self.overlay_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
+        self.raw_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
         
         ttk.Label(self.output_contour, text="X min:", width=10, anchor="e").grid(column=0, row=1, sticky="w")
         self.output_contour.x_min = ttk.Entry(self.output_contour, width=5)
@@ -236,6 +164,9 @@ class CentralWindow(tk.Toplevel):
         self.output_contour.z_max.grid(column=5, row=2, sticky="w", padx=(0, 10), pady=5)
         
         self.output_contour.columnconfigure(6, weight=1)
+        self.output_xyz.columnconfigure(6, weight=1)
+        self.output_overlay.columnconfigure(6, weight=1)
+        self.output_raw.columnconfigure(6, weight=1)
         
         return
 
