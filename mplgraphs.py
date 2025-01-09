@@ -1,8 +1,166 @@
 #!/usr/bin/env python3
 
-import matplotlib.pyplot as plt
 import numpy as np
+import tkinter as tk
+from tkinter import ttk
+from tkinter.colorchooser import askcolor
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
 from matplotlib.figure import Figure
+from matplotlib.colors import ListedColormap
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+CMAP_LIST = list(colormaps)
+CMAP_DEFAULT = "jet"
+
+class ContourPage(ttk.Frame):
+
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.figure = Figure(figsize=(5, 3.3), dpi=150)
+        self.x_array = np.array([0, 1])
+        self.y_array = np.array([0, 1])
+        self.z_array = np.array([[0, 0.5], [0.5, 1]])
+        self.params = {"color_u": "#0000FF", "color_o": "#FF0000"}
+
+        self.canvas = FigureCanvasTkAgg(self.figure, self)
+        self.param_frame = ttk.LabelFrame(self, text="Graph Settings")
+
+        ttk.Label(self.param_frame, text="X min:", width=8, anchor="e").grid(column=0, row=0, sticky="e", pady=(10, 0))
+        self.x_min = ttk.Entry(self.param_frame, width=15)
+        self.x_min.grid(column=1, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        ttk.Label(self.param_frame, text="Y min:", width=8, anchor="e").grid(column=2, row=0, sticky="e", pady=(10, 0))
+        self.y_min = ttk.Entry(self.param_frame, width=15)
+        self.y_min.grid(column=3, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        ttk.Label(self.param_frame, text="V min:", width=8, anchor="e").grid(column=4, row=0, sticky="e", pady=(10, 0))
+        self.v_min = ttk.Entry(self.param_frame, width=15)
+        self.v_min.grid(column=5, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        
+        ttk.Label(self.param_frame, text="X max:", width=8, anchor="e").grid(column=0, row=1, sticky="e", pady=(10, 0))
+        self.x_max = ttk.Entry(self.param_frame, width=15)
+        self.x_max.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
+        ttk.Label(self.param_frame, text="Y max:", width=8, anchor="e").grid(column=2, row=1, sticky="e", pady=(10, 0))
+        self.y_max = ttk.Entry(self.param_frame, width=15)
+        self.y_max.grid(column=3, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
+        ttk.Label(self.param_frame, text="V max:", width=8, anchor="e").grid(column=4, row=1, sticky="e", pady=(10, 0))
+        self.v_max = ttk.Entry(self.param_frame, width=15)
+        self.v_max.grid(column=5, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
+
+        ttk.Button(self.param_frame, text="Apply", width=15, command=self.update_figure).grid(column=7, row=0, sticky="w", padx=30, pady=(10, 0))
+        ttk.Button(self.param_frame, text="Reset", width=15, command=self.reset_params).grid(column=7, row=1, sticky="w", padx=30, pady=(10, 0))
+
+        self.update_figure()
+
+        ttk.Separator(self.param_frame, orient="horizontal").grid(
+            column=0, row=2, columnspan=9, sticky="ew", padx=20, pady=10
+        )
+
+        ttk.Label(self.param_frame, text="Colormap:", width=15, anchor="e").grid(column=0, row=3, sticky="e", pady=(0, 10))
+        self.cmap_cb = ttk.Combobox(self.param_frame, values=CMAP_LIST, state="readonly", width=15)
+        self.cmap_cb.grid(column=1, row=3, columnspan=2, sticky="ew", padx=(0, 10), pady=(0, 10))
+        self.cmap_cb.current(CMAP_LIST.index(CMAP_DEFAULT))
+        self.cmap_cb.bind("<<ComboboxSelected>>", lambda e: self.update_figure())
+
+        ttk.Label(self.param_frame, text="Under/Over:", width=12, anchor="e").grid(column=3, row=3, sticky="e", pady=(0, 10))
+        
+        frame_color_under = tk.Frame(self.param_frame, background="#cccccc", height=25, width=25)
+        frame_color_under.grid(column=4, row=3, sticky="w", padx=(0, 0), pady=(0, 10))
+        self.color_under_btn = tk.Button(frame_color_under, height=1, width=1, command=lambda: self.choose_color("under"))
+        self.color_under_btn.place(relw=0.7, relh=0.7, relx=0.14, rely=0.14)
+        self.color_under_btn.configure(background=self.params["color_u"], relief="flat")
+
+        frame_color_over = tk.Frame(self.param_frame, background="#cccccc", height=25, width=25)
+        frame_color_over.grid(column=4, row=3, columnspan=2, sticky="w", padx=(30, 0), pady=(0, 10))
+        self.color_over_btn = tk.Button(frame_color_over, height=1, width=1, command=lambda: self.choose_color("over"))
+        self.color_over_btn.place(relw=0.7, relh=0.7, relx=0.14, rely=0.14)
+        self.color_over_btn.configure(background=self.params["color_o"], relief="flat")
+
+        self.canvas.get_tk_widget().pack(side="top", fill="none", expand=True)
+        self.param_frame.pack(side="bottom", fill="none", expand=True)
+
+
+    def set_data(self, x, y, z):
+        self.x_array = x
+        self.y_array = y
+        self.z_array = z
+    
+    def choose_color(self, extreme: str):
+        _, color = askcolor()
+        if extreme == "under":
+            self.color_under_btn.configure(background=color)
+            self.params["color_u"] = color
+        elif extreme == "over":
+            self.color_over_btn.configure(background=color)
+            self.params["color_o"] = color
+        
+        self.update_figure()
+
+
+    def update_figure(self):
+        self.figure.clf()
+        self.figure = self.draw_axes(self.x_array, self.y_array, self.z_array)
+        self.canvas.draw()
+
+    def reset_params(self):
+        self.x_min.delete(0, "end")
+        self.x_max.delete(0, "end")
+        self.y_min.delete(0, "end")
+        self.y_max.delete(0, "end")
+        self.v_min.delete(0, "end")
+        self.v_max.delete(0, "end")
+        self.update_figure()
+
+    def draw_axes(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        z: np.ndarray,
+    ) -> Figure:
+        self.params["x_min"] = self.x_min.get()
+        self.params["x_max"] = self.x_max.get()
+        self.params["y_min"] = self.y_min.get()
+        self.params["y_max"] = self.y_max.get()
+        self.params["v_min"] = self.v_min.get()
+        self.params["v_max"] = self.v_max.get()
+
+        for key in ["x_min", "x_max", "y_min", "y_max", "v_min", "v_max"]:
+            try:
+                self.params[key] = float(self.params[key])
+            except:
+                self.params[key] = None
+        
+        self.figure.add_subplot()
+        axes = self.figure.axes[0]
+
+        try:
+            cmap = plt.colormaps[self.cmap_cb.get()].with_extremes(
+                under=self.params["color_u"], over=self.params["color_o"]
+            )
+        except:
+            cmap = ListedColormap(["#FFFFFF"])
+
+        if self.params["x_min"] == None:
+            self.params["x_min"] = x.min()
+        if self.params["x_max"] == None:
+            self.params["x_max"] = x.max()
+        if self.params["y_min"] == None:
+            self.params["y_min"] = y.min()
+        if self.params["y_max"] == None:
+            self.params["y_max"] = y.max()
+        if self.params["v_min"] == None:
+            self.params["v_min"] = z.min()
+        if self.params["v_max"] == None:
+            self.params["v_max"] = z.max()
+
+        axes.set_xlim(self.params["x_min"], self.params["x_max"])
+        axes.set_ylim(self.params["y_min"], self.params["y_max"])
+
+        levels = np.linspace(self.params["v_min"], self.params["v_max"], 100)
+
+        cs = axes.contourf(x, y, z, levels, cmap=cmap, extend="both")
+        cbar = self.figure.colorbar(cs)
+
+        return self.figure
 
 
 class ContourGraph(Figure):

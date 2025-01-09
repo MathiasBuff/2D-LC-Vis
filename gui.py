@@ -6,13 +6,13 @@ import matplotlib
 import matplotlib.pyplot
 matplotlib.use('TkAgg')
 import matplotlib.axes
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 from tkinter import ttk
 
-from backend import load_data, construct_axes, construct_matrix, get_figure_contour
+from backend import load_data, construct_axes, construct_matrix
 from opendialog import ask_file
-from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph
+from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph, ContourPage
 
 
 # Use root logger so that all modules can access it
@@ -64,8 +64,8 @@ class CentralWindow(tk.Toplevel):
 
         self.calc_frame = ttk.Labelframe(self, text="Calculation Conditions")
         self.output_note = ttk.Notebook(self)
-        self.calc_frame.grid(column=0, row=1, sticky="nsew", **PADDINGS)
-        self.output_note.grid(column=2, row=0, rowspan=2, sticky="nsew", **PADDINGS)
+        self.calc_frame.grid(column=0, row=1, sticky="new", **PADDINGS)
+        self.output_note.grid(column=2, row=0, rowspan=2, sticky="new", **PADDINGS)
         ttk.Separator(self, orient="vertical").grid(
             column=1, row=0, rowspan=2, sticky="ns", **PADDINGS
         )
@@ -117,9 +117,9 @@ class CentralWindow(tk.Toplevel):
         self.process_btn = ttk.Button(self.calc_frame, text="Process Data", command=self.process)
         self.process_btn.pack(side="top", expand=False, fill="both", **PADDINGS)
         
-        self.output_contour = ttk.LabelFrame(self.output_note, text="Contour Plot")
-        self.output_contour.pack(fill='both', expand=True)
-        self.output_note.add(self.output_contour, text="Contour")
+        self.contour_page = ContourPage(self.output_note)
+        self.contour_page.pack(fill="both", expand=True)
+        self.output_note.add(self.contour_page, text="Contour")
         
         self.output_xyz = ttk.LabelFrame(self.output_note, text="3D Plot")
         self.output_xyz.pack(fill='both', expand=True)
@@ -132,38 +132,15 @@ class CentralWindow(tk.Toplevel):
         self.output_raw = ttk.LabelFrame(self.output_note, text="2D Raw")
         self.output_raw.pack(fill='both', expand=True)
         self.output_note.add(self.output_raw, text="2D Raw")
-                
-        self.contour_graph = GraphPage(self.output_contour)
+
         self.xyz_graph = GraphPage(self.output_xyz)
         self.overlay_graph = GraphPage(self.output_overlay)
         self.raw_graph = GraphPage(self.output_raw)
         
-        self.contour_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
         self.xyz_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
         self.overlay_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
         self.raw_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
         
-        ttk.Label(self.output_contour, text="X min:", width=10, anchor="e").grid(column=0, row=1, sticky="w")
-        self.output_contour.x_min = ttk.Entry(self.output_contour, width=5)
-        self.output_contour.x_min.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=5)
-        ttk.Label(self.output_contour, text="Y min:", width=10, anchor="e").grid(column=2, row=1, sticky="w")
-        self.output_contour.y_min = ttk.Entry(self.output_contour, width=5)
-        self.output_contour.y_min.grid(column=3, row=1, sticky="w", padx=(0, 10), pady=5)
-        ttk.Label(self.output_contour, text="Z min:", width=10, anchor="e").grid(column=4, row=1, sticky="w")
-        self.output_contour.z_min = ttk.Entry(self.output_contour, width=5)
-        self.output_contour.z_min.grid(column=5, row=1, sticky="w", padx=(0, 10), pady=5)
-        
-        ttk.Label(self.output_contour, text="X max:", width=10, anchor="e").grid(column=0, row=2, sticky="w")
-        self.output_contour.x_max = ttk.Entry(self.output_contour, width=5)
-        self.output_contour.x_max.grid(column=1, row=2, sticky="w", padx=(0, 10), pady=5)
-        ttk.Label(self.output_contour, text="Y max:", width=10, anchor="e").grid(column=2, row=2, sticky="w")
-        self.output_contour.y_max = ttk.Entry(self.output_contour, width=5)
-        self.output_contour.y_max.grid(column=3, row=2, sticky="w", padx=(0, 10), pady=5)
-        ttk.Label(self.output_contour, text="Z max:", width=10, anchor="e").grid(column=4, row=2, sticky="w")
-        self.output_contour.z_max = ttk.Entry(self.output_contour, width=5)
-        self.output_contour.z_max.grid(column=5, row=2, sticky="w", padx=(0, 10), pady=5)
-        
-        self.output_contour.columnconfigure(6, weight=1)
         self.output_xyz.columnconfigure(6, weight=1)
         self.output_overlay.columnconfigure(6, weight=1)
         self.output_raw.columnconfigure(6, weight=1)
@@ -200,32 +177,8 @@ class CentralWindow(tk.Toplevel):
 
 
     def draw_contour(self):
-        try:
-            limits_x = (float(self.output_contour.x_min.get()), float(self.output_contour.x_max.get()))
-        except:
-            limits_x = None
-        try:
-            limits_y = (float(self.output_contour.y_min.get()), float(self.output_contour.y_max.get()))
-        except:
-            limits_y = None
-        try:
-            limits_z = (float(self.output_contour.z_min.get()), float(self.output_contour.z_max.get()))
-        except:
-            limits_z = None
-
-        fig_contour = ContourGraph(
-            self.ax_D2,
-            self.ax_D1,
-            self.value_matrix,
-            limits_x=limits_x,
-            limits_y=limits_y,
-            limits_z=limits_z,
-        )
-        
-        self.contour_graph._clear()
-        self.contour_graph.add_mpl_figure(fig_contour)
-        
-        return fig_contour
+        self.contour_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.contour_page.update_figure()
 
     def draw_xyz(self):
         fig_xyz = XYZGraph(
