@@ -372,6 +372,8 @@ class OverlayPage(ttk.Frame):
         self.x_max.delete(0, "end")
         self.y_min.delete(0, "end")
         self.y_max.delete(0, "end")
+        self.v_min.delete(0, "end")
+        self.v_max.delete(0, "end")
         self.update_figure()
 
     def draw_axes(
