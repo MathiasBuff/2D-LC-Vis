@@ -5,7 +5,9 @@ import time
 import threading
 import matplotlib
 import matplotlib.pyplot
-matplotlib.use('TkAgg')
+import matplotlib.style
+matplotlib.use("TkAgg")
+matplotlib.style.use("fast")
 import matplotlib.axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
@@ -14,7 +16,7 @@ from tkinter import ttk
 
 from backend import load_data, construct_axes, construct_matrix
 from opendialog import ask_file
-from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph, ContourPage, XYZPage, OverlayPage, RawPage
+from mplgraphs import ContourPage, XYZPage, OverlayPage, RawPage
 
 
 # Use root logger so that all modules can access it
@@ -190,23 +192,6 @@ class CentralWindow(tk.Toplevel):
         self.raw_page = RawPage(self.output_note)
         self.raw_page.pack(fill="both", expand=True)
         self.output_note.add(self.raw_page, text="Raw")
-                
-        # self.output_overlay = ttk.LabelFrame(self.output_note, text="Overlay")
-        # self.output_overlay.pack(fill='both', expand=True)
-        # self.output_note.add(self.output_overlay, text="Overlay")
-        
-        # self.output_raw = ttk.LabelFrame(self.output_note, text="Raw")
-        # self.output_raw.pack(fill='both', expand=True)
-        # self.output_note.add(self.output_raw, text="Raw")
-
-        # self.overlay_graph = GraphPage(self.output_overlay)
-        # self.raw_graph = GraphPage(self.output_raw)
-        
-        # self.overlay_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
-        # self.raw_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
-        
-        # self.output_overlay.columnconfigure(6, weight=1)
-        # self.output_raw.columnconfigure(6, weight=1)
         
         return
 
@@ -260,30 +245,9 @@ class CentralWindow(tk.Toplevel):
         self.overlay_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
         self.overlay_page.update_figure()
         
-        # fig_overlay = OverlayGraph(
-        #     self.ax_D2,
-        #     self.ax_D1,
-        #     self.value_matrix
-        # )
-        
-        # self.overlay_graph._clear()
-        # self.overlay_graph.add_mpl_figure(fig_overlay)
-        
-        # return fig_overlay
-
     def draw_raw(self):
         self.raw_page.set_data(self.data[:, 0], self.data[:, 1])
         self.raw_page.update_figure()
-        
-        # fig_raw = RawGraph(
-        #     self.data[:, 0],
-        #     self.data[:, 1]
-        # )
-        
-        # self.raw_graph._clear()
-        # self.raw_graph.add_mpl_figure(fig_raw)
-        
-        # return fig_raw
 
     def on_exit(self, event=None):
         logger.debug("Exiting application.\n")

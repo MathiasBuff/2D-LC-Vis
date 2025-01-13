@@ -34,7 +34,7 @@ def load_data(initiator, path, sheet, headers) -> np.ndarray:
         h = 0
     else:
         h = None
-    initiator.data = np.array(pd.read_excel(path, sheet, header=h))
+    initiator.data = np.array(pd.read_excel(path, sheet, header=h, engine="calamine"))
     logging.info("Data successfully loaded.")
 
 def construct_axes(
