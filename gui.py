@@ -14,7 +14,7 @@ from tkinter import ttk
 
 from backend import load_data, construct_axes, construct_matrix
 from opendialog import ask_file
-from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph, ContourPage
+from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph, ContourPage, XYZPage, OverlayPage, RawPage
 
 
 # Use root logger so that all modules can access it
@@ -177,31 +177,36 @@ class CentralWindow(tk.Toplevel):
         
         self.contour_page = ContourPage(self.output_note)
         self.contour_page.pack(fill="both", expand=True)
-        self.output_note.add(self.contour_page, text="Contour")
+        self.output_note.add(self.contour_page, text="2D Contour")
         
-        self.output_xyz = ttk.LabelFrame(self.output_note, text="3D Plot")
-        self.output_xyz.pack(fill='both', expand=True)
-        self.output_note.add(self.output_xyz, text="3D Plot")
+        self.xyz_page = XYZPage(self.output_note)
+        self.xyz_page.pack(fill="both", expand=True)
+        self.output_note.add(self.xyz_page, text="3D Contour")
         
-        self.output_overlay = ttk.LabelFrame(self.output_note, text="2D Overlay")
-        self.output_overlay.pack(fill='both', expand=True)
-        self.output_note.add(self.output_overlay, text="2D Overlay")
+        self.overlay_page = OverlayPage(self.output_note)
+        self.overlay_page.pack(fill="both", expand=True)
+        self.output_note.add(self.overlay_page, text="Overlay")
         
-        self.output_raw = ttk.LabelFrame(self.output_note, text="2D Raw")
-        self.output_raw.pack(fill='both', expand=True)
-        self.output_note.add(self.output_raw, text="2D Raw")
+        self.raw_page = RawPage(self.output_note)
+        self.raw_page.pack(fill="both", expand=True)
+        self.output_note.add(self.raw_page, text="Raw")
+                
+        # self.output_overlay = ttk.LabelFrame(self.output_note, text="Overlay")
+        # self.output_overlay.pack(fill='both', expand=True)
+        # self.output_note.add(self.output_overlay, text="Overlay")
+        
+        # self.output_raw = ttk.LabelFrame(self.output_note, text="Raw")
+        # self.output_raw.pack(fill='both', expand=True)
+        # self.output_note.add(self.output_raw, text="Raw")
 
-        self.xyz_graph = GraphPage(self.output_xyz)
-        self.overlay_graph = GraphPage(self.output_overlay)
-        self.raw_graph = GraphPage(self.output_raw)
+        # self.overlay_graph = GraphPage(self.output_overlay)
+        # self.raw_graph = GraphPage(self.output_raw)
         
-        self.xyz_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
-        self.overlay_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
-        self.raw_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
+        # self.overlay_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
+        # self.raw_graph.grid(column=0, row=0, columnspan=7, sticky="nsew")
         
-        self.output_xyz.columnconfigure(6, weight=1)
-        self.output_overlay.columnconfigure(6, weight=1)
-        self.output_raw.columnconfigure(6, weight=1)
+        # self.output_overlay.columnconfigure(6, weight=1)
+        # self.output_raw.columnconfigure(6, weight=1)
         
         return
 
@@ -248,39 +253,37 @@ class CentralWindow(tk.Toplevel):
         self.contour_page.update_figure()
 
     def draw_xyz(self):
-        fig_xyz = XYZGraph(
-            self.ax_D2,
-            self.ax_D1,
-            self.value_matrix
-        )
-        
-        self.xyz_graph._clear()
-        self.xyz_graph.add_mpl_figure(fig_xyz)
-        
-        return fig_xyz
+        self.xyz_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.xyz_page.update_figure()
 
     def draw_overlay(self):
-        fig_overlay = OverlayGraph(
-            self.ax_D2,
-            self.ax_D1,
-            self.value_matrix
-        )
+        self.overlay_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.overlay_page.update_figure()
         
-        self.overlay_graph._clear()
-        self.overlay_graph.add_mpl_figure(fig_overlay)
+        # fig_overlay = OverlayGraph(
+        #     self.ax_D2,
+        #     self.ax_D1,
+        #     self.value_matrix
+        # )
         
-        return fig_overlay
+        # self.overlay_graph._clear()
+        # self.overlay_graph.add_mpl_figure(fig_overlay)
+        
+        # return fig_overlay
 
     def draw_raw(self):
-        fig_raw = RawGraph(
-            self.data[:, 0],
-            self.data[:, 1]
-        )
+        self.raw_page.set_data(self.data[:, 0], self.data[:, 1])
+        self.raw_page.update_figure()
         
-        self.raw_graph._clear()
-        self.raw_graph.add_mpl_figure(fig_raw)
+        # fig_raw = RawGraph(
+        #     self.data[:, 0],
+        #     self.data[:, 1]
+        # )
         
-        return fig_raw
+        # self.raw_graph._clear()
+        # self.raw_graph.add_mpl_figure(fig_raw)
+        
+        # return fig_raw
 
     def on_exit(self, event=None):
         logger.debug("Exiting application.\n")
