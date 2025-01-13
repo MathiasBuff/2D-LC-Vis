@@ -2,12 +2,14 @@
 
 import logging
 import time
+import threading
 import matplotlib
 import matplotlib.pyplot
 matplotlib.use('TkAgg')
 import matplotlib.axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
+import tkinter.scrolledtext as ScrolledText
 from tkinter import ttk
 
 from backend import load_data, construct_axes, construct_matrix
@@ -19,6 +21,7 @@ from mplgraphs import ContourGraph, XYZGraph, OverlayGraph, RawGraph, ContourPag
 logger = logging.getLogger()
 
 PADDINGS = {"padx": 10, "pady": 10}
+LOGGING_LEVEL = logging.DEBUG
 
 class GraphPage(tk.Frame):
 
@@ -35,6 +38,32 @@ class GraphPage(tk.Frame):
         for child in self.winfo_children():
             child.destroy()
 
+class TextHandler(logging.Handler):
+    """
+    This class allows you to log to a Tkinter Text or ScrolledText widget.
+
+    Adapted from Moshe Kaplan: https://gist.github.com/moshekaplan/c425f861de7bbf28ef06
+    """
+
+    def __init__(self, text):
+        # run the regular Handler __init__
+        logging.Handler.__init__(self)
+        # Store a reference to the Text it will log to
+        self.text = text
+
+    def emit(self, record):
+        msg = self.format(record)
+
+        def append():
+            self.text.configure(state="normal")
+            self.text.insert(tk.END, msg + "\n")
+            self.text.configure(state="disabled")
+            # Autoscroll to the bottom
+            self.text.yview(tk.END)
+
+        # This is necessary because we can't modify the Text from other threads
+        self.text.after(0, append)
+
 
 class CentralWindow(tk.Toplevel):
     def __init__(self, master: tk.Tk):
@@ -46,6 +75,8 @@ class CentralWindow(tk.Toplevel):
         self.data = None
 
         self.body()
+        logging.info("2D-LC Visualizer v0.1.0")
+        logging.info("-"*42)
         self.bind("<Control-q>", self.on_exit)
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
 
@@ -60,16 +91,19 @@ class CentralWindow(tk.Toplevel):
         xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
         yCoordinate = int((screenHeight / 2) - (windowHeight / 2))
         self.geometry(f"{windowWidth}x{windowHeight}+{xCoordinate}+{yCoordinate}")
-        # self.resizable(False, False)
+        self.resizable(False, False)
 
         self.calc_frame = ttk.Labelframe(self, text="Calculation Conditions")
         self.output_note = ttk.Notebook(self)
+        self.console_frame = ttk.Labelframe(self, text="Log output")
         self.calc_frame.grid(column=0, row=1, sticky="new", **PADDINGS)
-        self.output_note.grid(column=2, row=0, rowspan=2, sticky="new", **PADDINGS)
+        self.output_note.grid(column=2, row=0, rowspan=3, sticky="nsew", **PADDINGS)
+        self.console_frame.grid(column=0, row=2, sticky="sew", **PADDINGS)
         ttk.Separator(self, orient="vertical").grid(
-            column=1, row=0, rowspan=2, sticky="ns", **PADDINGS
+            column=1, row=0, rowspan=3, sticky="ns", **PADDINGS
         )
-        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.columnconfigure(0, weight=1)
         
         self.load_btn = ttk.Button(self, text="Load Excel File", command=self.load)
         self.load_btn.grid(column=0, row=0, sticky="nsew", **PADDINGS)
@@ -88,9 +122,9 @@ class CentralWindow(tk.Toplevel):
         )
 
         self.st_entry = ttk.Entry(st_frame)
-        self.st_entry.pack(side="right", fill="x", expand="yes")
+        self.st_entry.pack(side="right", fill="none", expand="yes")
         self.shift_entry = ttk.Entry(shift_frame)
-        self.shift_entry.pack(side="right", fill="x", expand="yes")
+        self.shift_entry.pack(side="right", fill="none", expand="yes")
         
         self.shift_entry.insert(tk.END, "Not Implemented")
         self.shift_entry['state'] = "disabled"
@@ -107,8 +141,7 @@ class CentralWindow(tk.Toplevel):
         )
         
         self.blk_entry = ttk.Entry(blank_frame)
-        self.blk_entry.grid(column=1, row=1, sticky="nsew")
-        
+        self.blk_entry.grid(column=1, row=1, sticky="nsw")
         self.blk_entry.insert(tk.END, "Not Implemented")
         self.blk_entry['state'] = "disabled"
         
@@ -116,6 +149,31 @@ class CentralWindow(tk.Toplevel):
         
         self.process_btn = ttk.Button(self.calc_frame, text="Process Data", command=self.process)
         self.process_btn.pack(side="top", expand=False, fill="both", **PADDINGS)
+        
+        
+        console = ScrolledText.ScrolledText(
+            self.console_frame, width=15, height=20, state="disabled"
+        )
+        console.configure(font="Calibri")
+        console.grid(column=0, row=0, sticky="nsew", **PADDINGS)
+
+        self.console_frame.columnconfigure(0, weight=1)
+        self.console_frame.rowconfigure(0, weight=1)
+        
+        # Create textLogger
+        text_handler = TextHandler(console)
+
+        # Add the handler to logger
+        logger.addHandler(text_handler)
+        text_handler.setLevel(LOGGING_LEVEL)
+
+        self.pb = ttk.Progressbar(
+            self.console_frame,
+            orient="horizontal",
+            mode="determinate"
+        )
+        self.pb.grid(column=0, row=1, sticky="nsew", **PADDINGS)
+        
         
         self.contour_page = ContourPage(self.output_note)
         self.contour_page.pack(fill="both", expand=True)
@@ -148,13 +206,22 @@ class CentralWindow(tk.Toplevel):
         return
 
     def load(self):
+        logging.info("entering gui.load function")
         file_parameters = ask_file()
-        self.data = load_data(
-            file_parameters["path"],
-            file_parameters["sheet"],
-            file_parameters["headers"],
-        )
-        print("data loaded.")
+        logging.debug(f"ask_file dialog exited with {file_parameters}")
+        threading.Thread(
+            target=load_data,
+            args=[
+                self,
+                file_parameters["path"],
+                file_parameters["sheet"],
+                file_parameters["headers"],
+                ]
+        ).start()
+        threading.Thread(
+            target=freeze_buttons,
+            args=[self],
+        ).start()
     
     def process(self):
         self.ax_D1, self.ax_D2 = construct_axes(

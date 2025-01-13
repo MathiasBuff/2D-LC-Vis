@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import numpy as np
 import tkinter as tk
 from tkinter import ttk
@@ -12,6 +13,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 CMAP_LIST = list(colormaps)
 CMAP_DEFAULT = "jet"
+
+logger = logging.getLogger(__name__)
 
 class ContourPage(ttk.Frame):
 

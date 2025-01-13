@@ -28,12 +28,14 @@ def main():
     get_figure_contour(ax_D2, ax_D1, value_matrix, range(5, 100, 1))
     
 
-def load_data(path, sheet, headers) -> np.ndarray:
+def load_data(initiator, path, sheet, headers) -> np.ndarray:
+    logging.info(f"Loading data on '{sheet}'...")
     if headers:
         h = 0
     else:
         h = None
-    return np.array(pd.read_excel(path, sheet, header=h))
+    initiator.data = np.array(pd.read_excel(path, sheet, header=h))
+    logging.info("Data successfully loaded.")
 
 def construct_axes(
     time_data: np.ndarray,
