@@ -41,13 +41,14 @@ def construct_axes(
     time_data: np.ndarray,
     sampling_time: float
 ) -> tuple[np.ndarray, np.ndarray]:
-    
+    logging.info("Constructing time vectors...")
     input_time = time_data
     
     x_start = input_time[0]
     x_end = input_time[-1]
     delta = (x_end - x_start) / (len(input_time) - 1)
-    # frequency = 1 / (60 * delta)
+    frequency = 1 / (60 * delta)
+    logging.info(f"Sampling time: {sampling_time:.4f} min  --  Frequency: {frequency:.4f} Hz")
         
     # reindex time to prevent rounding errors
     input_time = np.arange(
@@ -68,7 +69,8 @@ def construct_axes(
         stop=x_end - (2 * sampling_time),
         step=sampling_time
     )
-    
+    logging.info(f"Number of points along D1: {len(time_column_D1)}\n\
+Number of points along D2: {len(time_column_D2)}")
     return (time_column_D1, time_column_D2)
 
 # FIXME: need more robustness on the matrix construction
@@ -77,6 +79,7 @@ def construct_matrix(
     ax_D1: np.ndarray,
     ax_D2: np.ndarray
 ) -> np.ndarray:
+    logging.info(f"Reshaping values into 2D matrix...")
     matrix = np.array(values[:len(ax_D2)])
         
     for n in range(1, len(ax_D1)):
@@ -86,6 +89,7 @@ def construct_matrix(
         array = values[array_start : array_end]
         matrix = np.vstack((matrix, array))
     
+    logging.info(f"Values reshaped into {matrix.shape}.")
     return matrix
 
 # TODO: Variables on levels, cmap, and axes

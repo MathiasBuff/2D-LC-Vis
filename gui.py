@@ -13,10 +13,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import ttk
+import numpy as np
 
 from backend import load_data, construct_axes, construct_matrix
 from opendialog import ask_file
-from mplgraphs import ContourPage, XYZPage, OverlayPage, RawPage
+from mplgraphs import ContourPage, XYZPage, OverlayPage, RawPage, ProjectionsPage
 
 
 # Use root logger so that all modules can access it
@@ -25,20 +26,6 @@ logger = logging.getLogger()
 PADDINGS = {"padx": 10, "pady": 10}
 LOGGING_LEVEL = logging.DEBUG
 
-class GraphPage(tk.Frame):
-
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
-        self.mpl_canvas = FigureCanvasTkAgg(None, self)
-
-    def add_mpl_figure(self, fig):
-        self.mpl_canvas = FigureCanvasTkAgg(fig, self)
-        self.mpl_canvas.draw()
-        self.mpl_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-    def _clear(self):
-        for child in self.winfo_children():
-            child.destroy()
 
 class TextHandler(logging.Handler):
     """
@@ -75,11 +62,13 @@ class CentralWindow(tk.Toplevel):
         master.withdraw()
         
         self.data = None
+        self.flag_dev = False
 
         self.body()
         logging.info("2D-LC Visualizer v0.1.0")
         logging.info("-"*42)
         self.bind("<Control-q>", self.on_exit)
+        self.bind("<Control-Shift-D>", self.toggle_dev)
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
 
     def body(self):
@@ -144,12 +133,12 @@ class CentralWindow(tk.Toplevel):
         
         self.blk_entry = ttk.Entry(blank_frame)
         self.blk_entry.grid(column=1, row=1, sticky="nsw")
-        self.blk_entry.insert(tk.END, "Not Implemented")
-        self.blk_entry['state'] = "disabled"
+        self.blk_entry.insert(tk.END, "10")
+        # self.blk_entry.state(["disabled"])
         
         blank_frame.columnconfigure(1, weight=1)
         
-        self.process_btn = ttk.Button(self.calc_frame, text="Process Data", command=self.process)
+        self.process_btn = ttk.Button(self.calc_frame, text="Process Data", command=self.process_gui)
         self.process_btn.pack(side="top", expand=False, fill="both", **PADDINGS)
         
         
@@ -196,7 +185,7 @@ class CentralWindow(tk.Toplevel):
         return
 
     def load(self):
-        logging.info("entering gui.load function")
+        logging.info("Asking user for Excel file...")
         file_parameters = ask_file()
         logging.debug(f"ask_file dialog exited with {file_parameters}")
         threading.Thread(
@@ -213,7 +202,17 @@ class CentralWindow(tk.Toplevel):
             args=[self],
         ).start()
     
-    def process(self):
+    def process_gui(self):
+        logging.info("Processing data...")
+        threading.Thread(
+            target=self._process,
+            ).start()
+        threading.Thread(
+            target=freeze_buttons,
+            args=[self],
+        ).start()
+    
+    def _process(self):
         self.ax_D1, self.ax_D2 = construct_axes(
             self.data[:, 0],
             float(self.st_entry.get()),
@@ -224,11 +223,30 @@ class CentralWindow(tk.Toplevel):
             self.ax_D1,
             self.ax_D2,
         )
-
+        
+        if self.blk_checkbox.instate(["selected"]):
+            try:
+                blank_time = float(self.blk_entry.get())
+                logging.info(f"Substracting data at {blank_time:.4f} min.")
+                blank_line = np.where(self.ax_D1 <= blank_time)[0][-1]
+                self.value_matrix = self.value_matrix - self.value_matrix[blank_line]
+            except:
+                pass
+        
+        logging.info("Processing complete.")
+        logging.info("Drawing figures...")
+                
         self.draw_contour()
         self.draw_xyz()
         self.draw_overlay()
-        self.draw_raw()    
+        self.draw_raw()
+        
+        logging.info("Done.")
+        
+        try:
+            self.draw_projections()
+        except:
+            pass
         
         return
 
@@ -248,11 +266,34 @@ class CentralWindow(tk.Toplevel):
     def draw_raw(self):
         self.raw_page.set_data(self.data[:, 0], self.data[:, 1])
         self.raw_page.update_figure()
+    
+    def draw_projections(self):
+        self.projections_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.projections_page.update_figure()
 
     def on_exit(self, event=None):
         logger.debug("Exiting application.\n")
         self.destroy()
         self.master.destroy()
+    
+    def toggle_dev(self, event=None):
+        if not self.flag_dev:
+            self.dev_menu = tk.Menu(self)
+            self.config(menu=self.dev_menu)
+            self.dev_menu.add_command(label="Projections Graph", command=self.toggle_projections)
+        else:
+            self.dev_menu.destroy()
+        
+        self.flag_dev = not self.flag_dev
+    
+    def toggle_projections(self):
+        try:
+            self.projections_page.destroy()
+        except:
+            self.projections_page = ProjectionsPage(self.output_note)
+            self.projections_page.pack(fill="both", expand=True)
+            self.output_note.add(self.projections_page, text="Projections")
+        
 
 def freeze_buttons(widget: tk.Tk | tk.Toplevel):
 
@@ -270,7 +311,7 @@ def freeze_buttons(widget: tk.Tk | tk.Toplevel):
     for button in buttons_list:
         button[0].config(state="disabled")
 
-    time.sleep(2)
+    time.sleep(1)
 
     for button in buttons_list:
         button[0].config(state=button[1])

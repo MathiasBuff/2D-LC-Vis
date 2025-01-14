@@ -516,3 +516,102 @@ class RawPage(ttk.Frame):
         axes.plot(x, y)
 
         return self.figure
+
+
+class ProjectionsPage(ttk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.figure = Figure(figsize=(5, 3.3), dpi=150)
+        self.x_array = np.array([0, 1])
+        self.y_array = np.array([0, 1])
+        self.z_array = np.array([[0, 0.5], [0.5, 1]])
+        self.params = {"color_u": "#0000FF", "color_o": "#FF0000"}
+
+        self.canvas = FigureCanvasTkAgg(self.figure, self)
+        self.param_frame = ttk.LabelFrame(self, text="Graph Settings")
+
+        ttk.Label(self.param_frame, text="D2 min:", width=8, anchor="e").grid(column=0, row=0, sticky="e", pady=(10, 0))
+        self.x_min = ttk.Entry(self.param_frame, width=15)
+        self.x_min.grid(column=1, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        ttk.Label(self.param_frame, text="D1 min:", width=8, anchor="e").grid(column=2, row=0, sticky="e", pady=(10, 0))
+        self.y_min = ttk.Entry(self.param_frame, width=15)
+        self.y_min.grid(column=3, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        
+        ttk.Label(self.param_frame, text="D2 max:", width=8, anchor="e").grid(column=0, row=1, sticky="e", pady=(10, 10))
+        self.x_max = ttk.Entry(self.param_frame, width=15)
+        self.x_max.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=(10, 10))
+        ttk.Label(self.param_frame, text="D1 max:", width=8, anchor="e").grid(column=2, row=1, sticky="e", pady=(10, 10))
+        self.y_max = ttk.Entry(self.param_frame, width=15)
+        self.y_max.grid(column=3, row=1, sticky="w", padx=(0, 10), pady=(10, 10))
+
+        ttk.Button(self.param_frame, text="Apply", width=15, command=self.update_figure).grid(column=7, row=0, sticky="w", padx=30, pady=(10, 0))
+        ttk.Button(self.param_frame, text="Reset", width=15, command=self.reset_params).grid(column=7, row=1, sticky="w", padx=30, pady=(10, 10))
+
+        self.update_figure()
+
+        self.canvas.get_tk_widget().pack(side="top", fill="none", expand=True)
+        self.param_frame.pack(side="bottom", fill="none", expand=True)
+
+
+    def set_data(self, x, y, z):
+        self.x_array = x
+        self.y_array = y
+        self.z_array = z
+    
+
+    def update_figure(self):
+        self.figure.clf()
+        self.figure = self.draw_axes(self.x_array, self.y_array, self.z_array)
+        self.canvas.draw()
+
+    def reset_params(self):
+        self.x_min.delete(0, "end")
+        self.x_max.delete(0, "end")
+        self.y_min.delete(0, "end")
+        self.y_max.delete(0, "end")
+        self.update_figure()
+
+    def draw_axes(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        z: np.ndarray,
+    ) -> Figure:
+        self.params["x_min"] = self.x_min.get()
+        self.params["x_max"] = self.x_max.get()
+        self.params["y_min"] = self.y_min.get()
+        self.params["y_max"] = self.y_max.get()
+
+        for key in ["x_min", "x_max", "y_min", "y_max"]:
+            try:
+                self.params[key] = float(self.params[key])
+            except:
+                self.params[key] = None
+        
+        
+        ax1 = self.figure.add_subplot(211)
+        ax2 = self.figure.add_subplot(212)
+        # self.figure.subplots_adjust(-0.3, 0.1, 0.9, 0.9)
+
+        
+        if self.params["x_min"] == None:
+            self.params["x_min"] = x.min()
+        if self.params["x_max"] == None:
+            self.params["x_max"] = x.max()
+        if self.params["y_min"] == None:
+            self.params["y_min"] = y.min()
+        if self.params["y_max"] == None:
+            self.params["y_max"] = y.max()
+
+        projection_D1 = np.sum(z, axis=1)
+        projection_D2 = np.sum(z, axis=0)
+                                
+        ax1.set_xlim(self.params["x_min"], self.params["x_max"])
+        ax2.set_xlim(self.params["y_min"], self.params["y_max"])
+        ax1.set_xlabel("D2 [s]")
+        ax2.set_xlabel("D1 [min]")
+
+        ax1.plot(x, projection_D2)
+        ax2.plot(y, projection_D1)
+
+        return self.figure
