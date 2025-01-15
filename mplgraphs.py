@@ -158,8 +158,8 @@ class ContourPage(ttk.Frame):
 
         axes.set_xlim(self.params["x_min"], self.params["x_max"])
         axes.set_ylim(self.params["y_min"], self.params["y_max"])
-        axes.set_xlabel("D2 [s]")
-        axes.set_ylabel("D1 [min]")
+        axes.set_xlabel("D1 [min]")
+        axes.set_ylabel("D2 [s]")
 
         levels = np.linspace(self.params["v_min"], self.params["v_max"], 100)
 
@@ -304,8 +304,8 @@ class XYZPage(ttk.Frame):
         axes.set_xlim(self.params["x_min"], self.params["x_max"])
         axes.set_ylim(self.params["y_min"], self.params["y_max"])
         axes.set_zlim(self.params["v_min"], self.params["v_max"])
-        axes.set_xlabel("D2 [s]")
-        axes.set_ylabel("D1 [min]")
+        axes.set_xlabel("D1 [min]")
+        axes.set_ylabel("D2 [s]")
 
         levels = np.linspace(self.params["v_min"], self.params["v_max"], self.params["level_count"])
 
@@ -356,9 +356,10 @@ class OverlayPage(ttk.Frame):
         self.param_frame.pack(side="bottom", fill="none", expand=True)
 
 
+    # TODO: rename xyz
     def set_data(self, x, y, z):
-        self.x_array = x
-        self.y_array = y
+        self.x_array = y
+        self.y_array = x
         self.z_array = z
     
 
@@ -418,7 +419,7 @@ class OverlayPage(ttk.Frame):
         axes.set_ylim(self.params["v_min"], self.params["v_max"])
         axes.set_xlabel("D2 [s]")
         
-        for i, line in enumerate(z):
+        for i, line in enumerate(z.transpose()):
             if y[i] >= self.params["y_min"] and y[i] <= self.params["y_max"]:
                 axes.plot(x, line, label=f"{y[i]:.2f} min")
         box = axes.get_position()

@@ -82,7 +82,7 @@ class CentralWindow(tk.Toplevel):
         xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
         yCoordinate = int((screenHeight / 2) - (windowHeight / 2))
         self.geometry(f"{windowWidth}x{windowHeight}+{xCoordinate}+{yCoordinate}")
-        self.resizable(False, False)
+        # self.resizable(False, False)
 
         self.calc_frame = ttk.Labelframe(self, text="Calculation Conditions")
         self.output_note = ttk.Notebook(self)
@@ -94,7 +94,7 @@ class CentralWindow(tk.Toplevel):
             column=1, row=0, rowspan=3, sticky="ns", **PADDINGS
         )
         self.rowconfigure(2, weight=1)
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(2, weight=1)
         
         self.load_btn = ttk.Button(self, text="Load Excel File", command=self.load)
         self.load_btn.grid(column=0, row=0, sticky="nsew", **PADDINGS)
@@ -229,7 +229,8 @@ class CentralWindow(tk.Toplevel):
                 blank_time = float(self.blk_entry.get())
                 logging.info(f"Substracting data at {blank_time:.4f} min.")
                 blank_line = np.where(self.ax_D1 <= blank_time)[0][-1]
-                self.value_matrix = self.value_matrix - self.value_matrix[blank_line]
+                self.value_matrix = self.value_matrix.transpose() - self.value_matrix[:,blank_line]
+                self.value_matrix = self.value_matrix.transpose()
             except:
                 pass
         
@@ -252,15 +253,15 @@ class CentralWindow(tk.Toplevel):
 
 
     def draw_contour(self):
-        self.contour_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.contour_page.set_data(self.ax_D1, self.ax_D2, self.value_matrix)
         self.contour_page.update_figure()
 
     def draw_xyz(self):
-        self.xyz_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.xyz_page.set_data(self.ax_D1, self.ax_D2, self.value_matrix)
         self.xyz_page.update_figure()
 
     def draw_overlay(self):
-        self.overlay_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
+        self.overlay_page.set_data(self.ax_D1, self.ax_D2, self.value_matrix)
         self.overlay_page.update_figure()
         
     def draw_raw(self):
