@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import logging
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from pathlib import Path
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import pandas as pd
 from pathlib import Path
 from tkinter import ttk
-from tkinter.simpledialog import Dialog
 from tkinter.filedialog import askopenfilename
+from tkinter.simpledialog import Dialog
+
+import pandas as pd
 
 
 class OpenExcelDialog(Dialog):

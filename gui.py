@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
 
 import logging
-import time
 import threading
+import time
+
 import matplotlib
 import matplotlib.pyplot
 import matplotlib.style
 
 matplotlib.use("TkAgg")
 matplotlib.style.use("fast")
-import matplotlib.axes
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import ttk
+
+import matplotlib.axes
 import numpy as np
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from backend import load_data, construct_axes, construct_matrix
+from backend import construct_axes, construct_matrix, load_data
+from mplgraphs import (ContourPage, OverlayPage, ProjectionsPage, RawPage,
+                       XYZPage)
 from opendialog import ask_file
-from mplgraphs import ContourPage, XYZPage, OverlayPage, RawPage, ProjectionsPage
-
 
 # Use root logger so that all modules can access it
 logger = logging.getLogger()

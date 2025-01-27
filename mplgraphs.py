@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
 import logging
-import numpy as np
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import colormaps
-from matplotlib.figure import Figure
-from matplotlib.colors import ListedColormap
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.colors import ListedColormap
+from matplotlib.figure import Figure
 
 CMAP_LIST = list(colormaps)
 CMAP_DEFAULT = "jet"
