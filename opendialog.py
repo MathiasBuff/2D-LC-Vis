@@ -8,8 +8,7 @@ from tkinter.filedialog import askopenfilename
 
 
 class OpenExcelDialog(Dialog):
-    """Class to create a Excel File opening dialog.
-    """
+    """Class to create a Excel File opening dialog."""
 
     def __init__(self, parent=None, title: str | None = "Open Excel File"):
         super().__init__(parent, title=title)
@@ -56,14 +55,16 @@ class OpenExcelDialog(Dialog):
         self.path_entry = ttk.Entry(path_frame)
         self.path_entry.pack(side="left", fill="x", expand="yes")
         self.path_entry.state(["disabled"])
-        self.path_btn = ttk.Button(path_frame, text="Browse...", width=10, command=self.ask_file_path)
+        self.path_btn = ttk.Button(
+            path_frame, text="Browse...", width=10, command=self.ask_file_path
+        )
         self.path_btn.pack(side="right", fill="none", expand="no", padx=5)
         self.head_chck = ttk.Checkbutton(header_frame)
         self.head_chck.state(["!alternate"])
         self.head_chck.pack(side="left", fill="none", expand="no")
         self.sheet_cb = ttk.Combobox(worksheet_frame, state="readonly")
         self.sheet_cb.pack(side="right", fill="x", expand="no", padx=5)
-        
+
         return self.path_btn
 
     def buttonbox(self):
@@ -93,9 +94,9 @@ class OpenExcelDialog(Dialog):
         }
         self.result = result
         return True
-    
+
     def ask_file_path(self):
-        path = Path(askopenfilename(filetypes =[('Excel Files', '*.xlsx')]))
+        path = Path(askopenfilename(filetypes=[("Excel Files", "*.xlsx")]))
         self.path_entry.state(["!disabled"])
         self.path_entry.delete(0)
         self.path_entry.insert(0, path)
@@ -107,7 +108,6 @@ class OpenExcelDialog(Dialog):
 
 
 def ask_file() -> dict:
-    """get file parameters (path, sheetname, has_headers) from a user
-    """
+    """get file parameters (path, sheetname, has_headers) from a user"""
     l = OpenExcelDialog()
     return l.result

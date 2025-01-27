@@ -7,6 +7,7 @@ from tkinter import ttk
 
 from gui import CentralWindow
 
+
 def main():
     # Logging configuration
     logging.basicConfig(
@@ -28,12 +29,13 @@ def main():
     root.tk.call("source", theme_path)
     root.tk.call("set_theme", "light")
     root.style.theme_use("azure-light")
-    
+
     # Launch the main window of the application
     logger.info("Starting up application.\n")
     CentralWindow(root)
 
     root.mainloop()
 
-if __name__ == '__main__' :
+
+if __name__ == "__main__":
     main()

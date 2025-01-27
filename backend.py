@@ -11,22 +11,23 @@ from tkinter.filedialog import askopenfilename
 
 logger = logging.getLogger(__name__)
 
+
 def main():
-    
+
     sampling_time = 0.5078
     # sampling_time = 0.42
-    
-    #TODO make header optional with checkbox on load
+
+    # TODO make header optional with checkbox on load
     data = load_data()
-    
+
     input_time, input_values = data[:, 0], data[:, 1]
- 
+
     ax_D1, ax_D2 = construct_axes(input_time, sampling_time)
 
     value_matrix = construct_matrix(input_values, ax_D1, ax_D2)
-    
+
     get_figure_contour(ax_D2, ax_D1, value_matrix, range(5, 100, 1))
-    
+
 
 def load_data(initiator, path, sheet, headers) -> np.ndarray:
     logging.info(f"Loading data on '{sheet}'...")
@@ -37,84 +38,71 @@ def load_data(initiator, path, sheet, headers) -> np.ndarray:
     initiator.data = np.array(pd.read_excel(path, sheet, header=h, engine="calamine"))
     logging.info("Data successfully loaded.")
 
+
 def construct_axes(
-    time_data: np.ndarray,
-    sampling_time: float
+    time_data: np.ndarray, sampling_time: float
 ) -> tuple[np.ndarray, np.ndarray]:
     logging.info("Constructing time vectors...")
     input_time = time_data
-    
+
     x_start = input_time[0]
     x_end = input_time[-1]
     delta = (x_end - x_start) / (len(input_time) - 1)
     frequency = 1 / (60 * delta)
-    logging.info(f"Sampling time: {sampling_time:.4f} min  --  Frequency: {frequency:.4f} Hz")
-        
+    logging.info(
+        f"Sampling time: {sampling_time:.4f} min  --  Frequency: {frequency:.4f} Hz"
+    )
+
     # reindex time to prevent rounding errors
-    input_time = np.arange(
-        start=0,
-        stop=x_end + delta,
-        step=delta
-    )
-    
-    time_column_D2 = np.arange(
-        start=0,
-        stop=sampling_time + delta,
-        step=delta
-    )
-    time_column_D2 *= 60 # Convert to seconds
-    
+    input_time = np.arange(start=0, stop=x_end + delta, step=delta)
+
+    time_column_D2 = np.arange(start=0, stop=sampling_time + delta, step=delta)
+    time_column_D2 *= 60  # Convert to seconds
+
     time_column_D1 = np.arange(
-        start=0,
-        stop=x_end - (2 * sampling_time),
-        step=sampling_time
+        start=0, stop=x_end - (2 * sampling_time), step=sampling_time
     )
-    logging.info(f"Number of points along D1: {len(time_column_D1)}\n\
-Number of points along D2: {len(time_column_D2)}")
+    logging.info(
+        f"Number of points along D1: {len(time_column_D1)}\n\
+Number of points along D2: {len(time_column_D2)}"
+    )
     return (time_column_D1, time_column_D2)
+
 
 # FIXME: need more robustness on the matrix construction
 def construct_matrix(
-    values: np.ndarray,
-    ax_D1: np.ndarray,
-    ax_D2: np.ndarray
+    values: np.ndarray, ax_D1: np.ndarray, ax_D2: np.ndarray
 ) -> np.ndarray:
     logging.info(f"Reshaping values into 2D matrix...")
-    matrix = np.array(values[:len(ax_D2)])
-        
+    matrix = np.array(values[: len(ax_D2)])
+
     for n in range(1, len(ax_D1)):
-        array_start = n * len(ax_D2) - int(1.2*n)
-        array_end = (n + 1) * len(ax_D2) - int(1.2*n)
-        
-        array = values[array_start : array_end]
+        array_start = n * len(ax_D2) - int(1.2 * n)
+        array_end = (n + 1) * len(ax_D2) - int(1.2 * n)
+
+        array = values[array_start:array_end]
         matrix = np.vstack((matrix, array))
     matrix = matrix.transpose()
-    
+
     logging.info(f"Values reshaped into {matrix.shape}.")
     return matrix
 
+
 # TODO: Variables on levels, cmap, and axes
 def get_figure_contour(x, y, z, levels):
-    figure, axes = plt.subplots(layout='constrained')
-    cmap = plt.colormaps["gist_rainbow"]\
-        .with_extremes(under="black", over="white")
+    figure, axes = plt.subplots(layout="constrained")
+    cmap = plt.colormaps["gist_rainbow"].with_extremes(under="black", over="white")
 
-    contour_set = axes.contourf(
-        x,
-        y,
-        z,
-        levels,
-        cmap=cmap,
-        extend="both"
-        )
-    
+    contour_set = axes.contourf(x, y, z, levels, cmap=cmap, extend="both")
+
     axes.set_xlabel("D2 Time [s]")
     axes.set_ylabel("D1 Time [min]")
 
     cbar = figure.colorbar(contour_set)
     cbar.ax.set_ylabel("Value")
-    
+
     return figure
+
 
 if __name__ == "__main__":
     print(" \n")
