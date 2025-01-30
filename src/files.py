@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 from pathlib import Path
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
@@ -21,8 +22,12 @@ class OpenExcelDialog(Dialog):
 
         #overridden from simpledialog.Dialog
         """
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = "."
 
-        self.iconbitmap(default=r"graphics\unige-icon.ico")
+        self.iconbitmap(default=Path(base_path, "assets", "unige-icon.ico"))
 
         windowWidth = 300
         windowHeight = 250

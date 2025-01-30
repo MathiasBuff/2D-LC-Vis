@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import sys
+from pathlib import Path
 import logging
 import threading
 import time
@@ -18,10 +20,10 @@ import matplotlib.axes
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from backend import construct_axes, construct_matrix, load_data
-from mplgraphs import (ContourPage, OverlayPage, ProjectionsPage, RawPage,
+from calculations import construct_axes, construct_matrix, load_data
+from visualization import (ContourPage, OverlayPage, ProjectionsPage, RawPage,
                        XYZPage)
-from opendialog import ask_file
+from files import ask_file
 
 # Use root logger so that all modules can access it
 logger = logging.getLogger()
@@ -75,7 +77,13 @@ class CentralWindow(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
 
     def body(self):
-        self.iconbitmap(default=r"graphics\unige-icon.ico")
+        
+        if getattr(sys, 'frozen', False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = "."
+
+        self.iconbitmap(default=Path(base_path, "assets", "unige-icon.ico"))
         self.title("2D-LC Chromatogram Visualization")
 
         windowWidth = 1280
@@ -104,9 +112,11 @@ class CentralWindow(tk.Toplevel):
 
         st_frame = ttk.Frame(self.calc_frame)
         shift_frame = ttk.Frame(self.calc_frame)
+        cf_frame = ttk.Frame(self.calc_frame)
 
         st_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
         shift_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
+        cf_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
 
         ttk.Label(st_frame, text="Sampling time (min) :", anchor="w", width=20).pack(
             side="left", fill="x", expand=False
@@ -114,14 +124,19 @@ class CentralWindow(tk.Toplevel):
         ttk.Label(shift_frame, text="Time shift (s) :", anchor="w", width=20).pack(
             side="left", fill="x", expand=False
         )
+        ttk.Label(cf_frame, text="Correction factor :", anchor="w", width=20).pack(
+            side="left", fill="x", expand=False
+        )
 
         self.st_entry = ttk.Entry(st_frame)
         self.st_entry.pack(side="right", fill="none", expand="yes")
         self.shift_entry = ttk.Entry(shift_frame)
         self.shift_entry.pack(side="right", fill="none", expand="yes")
-
-        self.shift_entry.insert(tk.END, "Not Implemented")
-        self.shift_entry["state"] = "disabled"
+        self.cf_entry = ttk.Entry(cf_frame)
+        self.cf_entry.pack(side="right", fill="none", expand="yes")
+        
+        self.shift_entry.insert("end", "0")
+        self.cf_entry.insert("end", "0")
 
         blank_frame = ttk.Frame(self.calc_frame)
         blank_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
@@ -223,13 +238,16 @@ class CentralWindow(tk.Toplevel):
             self.data[:, 1],
             self.ax_D1,
             self.ax_D2,
+            float(self.shift_entry.get()),
+            float(self.cf_entry.get())
         )
 
         if self.blk_checkbox.instate(["selected"]):
             try:
                 blank_time = float(self.blk_entry.get())
-                logging.info(f"Substracting data at {blank_time:.4f} min.")
                 blank_line = np.where(self.ax_D1 <= blank_time)[0][-1]
+                
+                logging.info(f"Substracting data at {self.ax_D1[blank_line]:.4f} min.")
                 self.value_matrix = (
                     self.value_matrix.transpose() - self.value_matrix[:, blank_line]
                 )

@@ -30,12 +30,12 @@ class ContourPage(ttk.Frame):
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.param_frame = ttk.LabelFrame(self, text="Graph Settings")
 
-        ttk.Label(self.param_frame, text="D2 min:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D1 min:", width=8, anchor="e").grid(
             column=0, row=0, sticky="e", pady=(10, 0)
         )
         self.x_min = ttk.Entry(self.param_frame, width=15)
         self.x_min.grid(column=1, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
-        ttk.Label(self.param_frame, text="D1 min:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D2 min:", width=8, anchor="e").grid(
             column=2, row=0, sticky="e", pady=(10, 0)
         )
         self.y_min = ttk.Entry(self.param_frame, width=15)
@@ -46,12 +46,12 @@ class ContourPage(ttk.Frame):
         self.v_min = ttk.Entry(self.param_frame, width=15)
         self.v_min.grid(column=5, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
 
-        ttk.Label(self.param_frame, text="D2 max:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D1 max:", width=8, anchor="e").grid(
             column=0, row=1, sticky="e", pady=(10, 0)
         )
         self.x_max = ttk.Entry(self.param_frame, width=15)
         self.x_max.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
-        ttk.Label(self.param_frame, text="D1 max:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D2 max:", width=8, anchor="e").grid(
             column=2, row=1, sticky="e", pady=(10, 0)
         )
         self.y_max = ttk.Entry(self.param_frame, width=15)
@@ -119,8 +119,8 @@ class ContourPage(ttk.Frame):
         self.color_over_btn.place(relw=0.7, relh=0.7, relx=0.14, rely=0.14)
         self.color_over_btn.configure(background=self.params["color_o"], relief="flat")
 
-        self.canvas.get_tk_widget().pack(side="top", fill="none", expand=True)
-        self.param_frame.pack(side="bottom", fill="none", expand=True)
+        self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+        self.param_frame.pack(side="bottom", fill="none", expand=False)
 
     def set_data(self, x, y, z):
         self.x_array = x
@@ -221,12 +221,12 @@ class XYZPage(ttk.Frame):
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.param_frame = ttk.LabelFrame(self, text="Graph Settings")
 
-        ttk.Label(self.param_frame, text="D2 min:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D1 min:", width=8, anchor="e").grid(
             column=0, row=0, sticky="e", pady=(10, 0)
         )
         self.x_min = ttk.Entry(self.param_frame, width=15)
         self.x_min.grid(column=1, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
-        ttk.Label(self.param_frame, text="D1 min:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D2 min:", width=8, anchor="e").grid(
             column=2, row=0, sticky="e", pady=(10, 0)
         )
         self.y_min = ttk.Entry(self.param_frame, width=15)
@@ -237,12 +237,12 @@ class XYZPage(ttk.Frame):
         self.v_min = ttk.Entry(self.param_frame, width=15)
         self.v_min.grid(column=5, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
 
-        ttk.Label(self.param_frame, text="D2 max:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D1 max:", width=8, anchor="e").grid(
             column=0, row=1, sticky="e", pady=(10, 0)
         )
         self.x_max = ttk.Entry(self.param_frame, width=15)
         self.x_max.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
-        ttk.Label(self.param_frame, text="D1 max:", width=8, anchor="e").grid(
+        ttk.Label(self.param_frame, text="D2 max:", width=8, anchor="e").grid(
             column=2, row=1, sticky="e", pady=(10, 0)
         )
         self.y_max = ttk.Entry(self.param_frame, width=15)
@@ -287,8 +287,8 @@ class XYZPage(ttk.Frame):
         )
         self.level_count.insert(0, "100")
 
-        self.canvas.get_tk_widget().pack(side="top", fill="none", expand=True)
-        self.param_frame.pack(side="bottom", fill="none", expand=True)
+        self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
+        self.param_frame.pack(side="bottom", fill="none", expand=False)
 
     def set_data(self, x, y, z):
         self.x_array = x
@@ -434,7 +434,7 @@ class OverlayPage(ttk.Frame):
 
         self.update_figure()
 
-        self.canvas.get_tk_widget().pack(side="top", fill="none", expand=True)
+        self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
         self.param_frame.pack(side="bottom", fill="none", expand=True)
 
     # TODO: rename xyz
@@ -549,7 +549,7 @@ class RawPage(ttk.Frame):
 
         self.update_figure()
 
-        self.canvas.get_tk_widget().pack(side="top", fill="none", expand=True)
+        self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
         self.param_frame.pack(side="bottom", fill="none", expand=True)
 
     def set_data(self, x, y):
