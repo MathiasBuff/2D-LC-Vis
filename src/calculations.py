@@ -114,7 +114,7 @@ def construct_matrix(
         array = values[array_start:array_end]
         matrix = np.vstack((matrix, array))
         
-    matrix = matrix.transpose()
+    # matrix = matrix.transpose()
         
 
     # NAIVE RESHAPING ALGORITHM

@@ -25,7 +25,7 @@ class ContourPage(ttk.Frame):
         self.x_array = np.array([0, 1])
         self.y_array = np.array([0, 1])
         self.z_array = np.array([[0, 0.5], [0.5, 1]])
-        self.params = {"color_u": "#0000FF", "color_o": "#FF0000"}
+        self.params = {"color_u": "#FFFFFF", "color_o": "#000000"}
 
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.param_frame = ttk.LabelFrame(self, text="Graph Settings")
@@ -33,13 +33,13 @@ class ContourPage(ttk.Frame):
         ttk.Label(self.param_frame, text="D1 min:", width=8, anchor="e").grid(
             column=0, row=0, sticky="e", pady=(10, 0)
         )
-        self.x_min = ttk.Entry(self.param_frame, width=15)
-        self.x_min.grid(column=1, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        self.y_min = ttk.Entry(self.param_frame, width=15)
+        self.y_min.grid(column=1, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
         ttk.Label(self.param_frame, text="D2 min:", width=8, anchor="e").grid(
             column=2, row=0, sticky="e", pady=(10, 0)
         )
-        self.y_min = ttk.Entry(self.param_frame, width=15)
-        self.y_min.grid(column=3, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
+        self.x_min = ttk.Entry(self.param_frame, width=15)
+        self.x_min.grid(column=3, row=0, sticky="w", padx=(0, 10), pady=(10, 0))
         ttk.Label(self.param_frame, text="Val min:", width=8, anchor="e").grid(
             column=4, row=0, sticky="e", pady=(10, 0)
         )
@@ -49,13 +49,13 @@ class ContourPage(ttk.Frame):
         ttk.Label(self.param_frame, text="D1 max:", width=8, anchor="e").grid(
             column=0, row=1, sticky="e", pady=(10, 0)
         )
-        self.x_max = ttk.Entry(self.param_frame, width=15)
-        self.x_max.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
+        self.y_max = ttk.Entry(self.param_frame, width=15)
+        self.y_max.grid(column=1, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
         ttk.Label(self.param_frame, text="D2 max:", width=8, anchor="e").grid(
             column=2, row=1, sticky="e", pady=(10, 0)
         )
-        self.y_max = ttk.Entry(self.param_frame, width=15)
-        self.y_max.grid(column=3, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
+        self.x_max = ttk.Entry(self.param_frame, width=15)
+        self.x_max.grid(column=3, row=1, sticky="w", padx=(0, 10), pady=(10, 0))
         ttk.Label(self.param_frame, text="Val max:", width=8, anchor="e").grid(
             column=4, row=1, sticky="e", pady=(10, 0)
         )
@@ -198,8 +198,8 @@ class ContourPage(ttk.Frame):
 
         axes.set_xlim(self.params["x_min"], self.params["x_max"])
         axes.set_ylim(self.params["y_min"], self.params["y_max"])
-        axes.set_xlabel("D1 [min]")
-        axes.set_ylabel("D2 [s]")
+        axes.set_xlabel("D2 [s]")
+        axes.set_ylabel("D1 [min]")
 
         levels = np.linspace(self.params["v_min"], self.params["v_max"], 100)
 
@@ -368,8 +368,8 @@ class XYZPage(ttk.Frame):
         axes.set_xlim(self.params["x_min"], self.params["x_max"])
         axes.set_ylim(self.params["y_min"], self.params["y_max"])
         axes.set_zlim(self.params["v_min"], self.params["v_max"])
-        axes.set_xlabel("D1 [min]")
-        axes.set_ylabel("D2 [s]")
+        axes.set_xlabel("D2 [s]")
+        axes.set_ylabel("D1 [min]")
 
         levels = np.linspace(
             self.params["v_min"], self.params["v_max"], self.params["level_count"]
