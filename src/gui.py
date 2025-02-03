@@ -83,7 +83,7 @@ class CentralWindow(tk.Toplevel):
         else:
             base_path = "."
 
-        self.iconbitmap(default=Path(base_path, "assets", "unige-icon.ico"))
+        self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
         self.title("2D-LC Chromatogram Visualization")
 
         windowWidth = 1280

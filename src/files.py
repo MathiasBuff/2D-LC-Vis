@@ -27,7 +27,7 @@ class OpenExcelDialog(Dialog):
         else:
             base_path = "."
 
-        self.iconbitmap(default=Path(base_path, "assets", "unige-icon.ico"))
+        self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
         windowWidth = 300
         windowHeight = 250

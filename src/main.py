@@ -11,6 +11,7 @@ from gui import CentralWindow
 
 def main():
 
+    # Handle case where app is running as executable
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
     else:
@@ -18,7 +19,7 @@ def main():
 
     # Logging configuration
     logging.basicConfig(
-        filename=Path(base_path, "assets", "runtime.log"),
+        filename=Path(base_path, "utils", "runtime.log"),
         filemode="w",
         level=logging.INFO,
         format="%(asctime)s - %(levelname)-8s - %(name)s - %(message)s",
@@ -31,7 +32,7 @@ def main():
     root.withdraw()
 
     # Set style for the application
-    theme_path = Path(base_path, "assets", "theme", "azure.tcl")
+    theme_path = Path(base_path, "utils", "theme", "azure.tcl")
     root.style = ttk.Style(root)
     root.tk.call("source", theme_path)
     root.tk.call("set_theme", "light")

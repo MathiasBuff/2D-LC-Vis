@@ -100,31 +100,33 @@ def construct_matrix(
         num = np.where(ax_D2 <= (-shift))[0][-1]
         values = np.concatenate((values[num:], np.full(num, np.nan)))
     
-    # idx_start = 1
-    # frequency = 60 / ax_D2[1]
-    # sampling_time = ax_D1[1]
+    # SABINE RESHAPING ALGORITHM
+    idx_start = 1
+    frequency = 60 / ax_D2[1]
+    sampling_time = ax_D1[1]
     
-    # for j in range(len(ax_D1) - 1):
-    #     skew = int(j * correction_factor)
-    #     array_start = int(j * sampling_time * frequency) + idx_start - skew
-    #     array_end = array_start + len(ax_D2)
+    for n in range(len(ax_D1) - 1):
+        skew = int(n * correction_factor)
         
-    #     array = values[array_start:array_end]
-    #     matrix = np.vstack((matrix, array))
+        array_start = int(n * sampling_time * frequency) + idx_start - skew
+        array_end = array_start + len(ax_D2)
         
-    # matrix = matrix.transpose()
+        array = values[array_start:array_end]
+        matrix = np.vstack((matrix, array))
+        
+    matrix = matrix.transpose()
         
 
     # NAIVE RESHAPING ALGORITHM
-    for n in range(1, len(ax_D1)):
-        skew = int(n * correction_factor)
+    # for n in range(1, len(ax_D1)):
+    #     skew = int(n * correction_factor)
         
-        array_start = n * len(ax_D2) - skew
-        array_end = (n + 1) * len(ax_D2) - skew
+    #     array_start = n * len(ax_D2) - skew
+    #     array_end = array_start + len(ax_D2)
 
-        array = values[array_start:array_end]
-        matrix = np.vstack((matrix, array))
-    matrix = matrix.transpose()
+    #     array = values[array_start:array_end]
+    #     matrix = np.vstack((matrix, array))
+    # matrix = matrix.transpose()
 
     logging.info(f"Values reshaped into {matrix.shape}.")
     return matrix
