@@ -25,12 +25,11 @@ from visualization import (ContourPage, OverlayPage, ProjectionsPage, RawPage,
                        XYZPage)
 from files import ask_file
 
-# Use root logger so that all modules can access it
+# Use root logger
 logger = logging.getLogger()
 
 PADDINGS = {"padx": 10, "pady": 10}
-LOGGING_LEVEL = logging.DEBUG
-
+LOGGING_LEVEL = logging.INFO
 
 class TextHandler(logging.Handler):
     """
@@ -58,7 +57,6 @@ class TextHandler(logging.Handler):
         # This is necessary because we can't modify the Text from other threads
         self.text.after(0, append)
 
-
 class CentralWindow(tk.Toplevel):
     def __init__(self, master: tk.Tk):
         super().__init__(master)
@@ -67,13 +65,11 @@ class CentralWindow(tk.Toplevel):
         master.withdraw()
 
         self.data = None
-        self.flag_dev = False
 
         self.body()
-        logging.info("2D-LC Visualizer v0.1.0")
+        logging.info("2D-LC Visualizer v0.2.0")
         logging.info("-" * 42)
         self.bind("<Control-q>", self.on_exit)
-        self.bind("<Control-Shift-D>", self.toggle_dev)
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
 
     def body(self):
@@ -82,8 +78,9 @@ class CentralWindow(tk.Toplevel):
             base_path = sys._MEIPASS
         else:
             base_path = "."
-
-        self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
+        
+        # self.tk.call("wm", "iconphoto", self._w, tk.PhotoImage(file=Path(base_path, "utils", "unige-logo.png")))
+        # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
         self.title("2D-LC Chromatogram Visualization")
 
         windowWidth = 1280
@@ -100,7 +97,7 @@ class CentralWindow(tk.Toplevel):
         self.console_frame = ttk.Labelframe(self, text="Log output")
         self.calc_frame.grid(column=0, row=1, sticky="new", **PADDINGS)
         self.output_note.grid(column=2, row=0, rowspan=3, sticky="nsew", **PADDINGS)
-        self.console_frame.grid(column=0, row=2, sticky="sew", **PADDINGS)
+        self.console_frame.grid(column=0, row=2, sticky="nsew", **PADDINGS)
         ttk.Separator(self, orient="vertical").grid(
             column=1, row=0, rowspan=3, sticky="ns", **PADDINGS
         )
@@ -111,32 +108,15 @@ class CentralWindow(tk.Toplevel):
         self.load_btn.grid(column=0, row=0, sticky="nsew", **PADDINGS)
 
         st_frame = ttk.Frame(self.calc_frame)
-        shift_frame = ttk.Frame(self.calc_frame)
-        cf_frame = ttk.Frame(self.calc_frame)
-
         st_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
-        shift_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
-        cf_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
 
         ttk.Label(st_frame, text="Sampling time (min) :", anchor="w", width=20).pack(
             side="left", fill="x", expand=False
         )
-        ttk.Label(shift_frame, text="Time shift (s) :", anchor="w", width=20).pack(
-            side="left", fill="x", expand=False
-        )
-        ttk.Label(cf_frame, text="Correction factor :", anchor="w", width=20).pack(
-            side="left", fill="x", expand=False
-        )
-
+        
         self.st_entry = ttk.Entry(st_frame)
         self.st_entry.pack(side="right", fill="none", expand="yes")
-        self.shift_entry = ttk.Entry(shift_frame)
-        self.shift_entry.pack(side="right", fill="none", expand="yes")
-        self.cf_entry = ttk.Entry(cf_frame)
-        self.cf_entry.pack(side="right", fill="none", expand="yes")
         
-        self.shift_entry.insert("end", "0")
-        self.cf_entry.insert("end", "0")
 
         blank_frame = ttk.Frame(self.calc_frame)
         blank_frame.pack(side="top", expand=False, fill="both", **PADDINGS)
@@ -151,8 +131,7 @@ class CentralWindow(tk.Toplevel):
 
         self.blk_entry = ttk.Entry(blank_frame)
         self.blk_entry.grid(column=1, row=1, sticky="nsw")
-        self.blk_entry.insert(tk.END, "10")
-        # self.blk_entry.state(["disabled"])
+        self.blk_entry.insert(tk.END, "0")
 
         blank_frame.columnconfigure(1, weight=1)
 
@@ -176,11 +155,6 @@ class CentralWindow(tk.Toplevel):
         # Add the handler to logger
         logger.addHandler(text_handler)
         text_handler.setLevel(LOGGING_LEVEL)
-
-        self.pb = ttk.Progressbar(
-            self.console_frame, orient="horizontal", mode="determinate"
-        )
-        self.pb.grid(column=0, row=1, sticky="nsew", **PADDINGS)
 
         self.contour_page = ContourPage(self.output_note)
         self.contour_page.pack(fill="both", expand=True)
@@ -219,6 +193,7 @@ class CentralWindow(tk.Toplevel):
         ).start()
 
     def process_gui(self):
+        logging.info("")
         logging.info("Processing data...")
         threading.Thread(
             target=self._process,
@@ -238,10 +213,9 @@ class CentralWindow(tk.Toplevel):
             self.data[:, 1],
             self.ax_D1,
             self.ax_D2,
-            float(self.shift_entry.get()),
-            float(self.cf_entry.get())
         )
 
+        # TODO: Extract blank substraction to calculations module 
         if self.blk_checkbox.instate(["selected"]):
             try:
                 blank_time = float(self.blk_entry.get())
@@ -249,10 +223,11 @@ class CentralWindow(tk.Toplevel):
                 
                 logging.info(f"Substracting data at {self.ax_D1[blank_line]:.4f} min.")
                 self.value_matrix = (
-                    self.value_matrix.transpose() - self.value_matrix[:, blank_line]
+                    self.value_matrix - self.value_matrix[blank_line, :]
                 )
-                self.value_matrix = self.value_matrix.transpose()
+                self.value_matrix = self.value_matrix
             except:
+                logging.debug("failed blank substraction")
                 pass
 
         logging.info("Processing complete.")
@@ -263,12 +238,7 @@ class CentralWindow(tk.Toplevel):
         self.draw_overlay()
         self.draw_raw()
 
-        logging.info("Done.")
-
-        try:
-            self.draw_projections()
-        except:
-            pass
+        logging.info("Done.\n")
 
         return
 
@@ -288,37 +258,15 @@ class CentralWindow(tk.Toplevel):
         self.raw_page.set_data(self.data[:, 0], self.data[:, 1])
         self.raw_page.update_figure()
 
-    def draw_projections(self):
-        self.projections_page.set_data(self.ax_D2, self.ax_D1, self.value_matrix)
-        self.projections_page.update_figure()
-
     def on_exit(self, event=None):
         logger.debug("Exiting application.\n")
         self.destroy()
         self.master.destroy()
 
-    def toggle_dev(self, event=None):
-        if not self.flag_dev:
-            self.dev_menu = tk.Menu(self)
-            self.config(menu=self.dev_menu)
-            self.dev_menu.add_command(
-                label="Projections Graph", command=self.toggle_projections
-            )
-        else:
-            self.dev_menu.destroy()
-
-        self.flag_dev = not self.flag_dev
-
-    def toggle_projections(self):
-        try:
-            self.projections_page.destroy()
-        except:
-            self.projections_page = ProjectionsPage(self.output_note)
-            self.projections_page.pack(fill="both", expand=True)
-            self.output_note.add(self.projections_page, text="Projections")
-
-
-def freeze_buttons(widget: tk.Tk | tk.Toplevel):
+def freeze_buttons(widget: tk.Tk | tk.Toplevel) -> None:
+    """
+    Freezes all child buttons of widget to prevent accidental double-clicks
+    """
 
     _list = widget.winfo_children()
 

@@ -10,7 +10,13 @@ from gui import CentralWindow
 
 
 def main():
-
+    """
+    Entry point for the application.
+    When bundling application as executable, the main.py file is
+    targeted, running this function to set up some basic configuration
+    and launch the GUI.
+    """
+    
     # Handle case where app is running as executable
     if getattr(sys, 'frozen', False):
         base_path = sys._MEIPASS
@@ -21,7 +27,7 @@ def main():
     logging.basicConfig(
         filename=Path(base_path, "utils", "runtime.log"),
         filemode="w",
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s - %(levelname)-8s - %(name)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
@@ -37,10 +43,18 @@ def main():
     root.tk.call("source", theme_path)
     root.tk.call("set_theme", "light")
     root.style.theme_use("azure-light")
+    root.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
     # Launch the main window of the application
     logger.info("Starting up application.\n")
     CentralWindow(root)
+    
+    # Close the splash image once everything is loaded
+    try:
+        import pyi_splash
+        pyi_splash.close()
+    except:
+        pass
 
     root.mainloop()
 

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
 import sys
+import logging
 from pathlib import Path
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.simpledialog import Dialog
 
 import pandas as pd
+
+# Use root logger
+logger = logging.getLogger(__name__)
 
 
 class OpenExcelDialog(Dialog):
@@ -27,7 +31,7 @@ class OpenExcelDialog(Dialog):
         else:
             base_path = "."
 
-        self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
+        # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
         windowWidth = 300
         windowHeight = 250
