@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import logging
+import sys
 from pathlib import Path
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
@@ -26,7 +26,7 @@ class OpenExcelDialog(Dialog):
 
         #overridden from simpledialog.Dialog
         """
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             base_path = sys._MEIPASS
         else:
             base_path = "."

@@ -121,7 +121,9 @@ class ContourPage(ttk.Frame):
         self.color_over_btn.place(relw=0.7, relh=0.7, relx=0.14, rely=0.14)
         self.color_over_btn.configure(background=self.params["color_o"], relief="flat")
 
-        ttk.Button(self, text="Save", command=self.save_figure).pack(side="top", fill="none", expand=False)
+        ttk.Button(self, text="Save", command=self.save_figure).pack(
+            side="top", fill="none", expand=False
+        )
 
         self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
         self.param_frame.pack(side="bottom", fill="x", expand=False)
@@ -216,16 +218,16 @@ class ContourPage(ttk.Frame):
         name = asksaveasfilename()
         if name == "":
             return
-        
+
         fig = self.figure
         axes = fig.axes[0]
-        
+
         fig.set_dpi(300)
         fig.set_size_inches(12, 9)
         axes.set_xlabel(axes.get_xlabel(), fontsize=20)
         axes.set_ylabel(axes.get_ylabel(), fontsize=20)
-        axes.tick_params(axis='both', which='major', labelsize=15)
-        
+        axes.tick_params(axis="both", which="major", labelsize=15)
+
         fig.savefig(name)
 
 
