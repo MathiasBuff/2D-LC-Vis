@@ -5,7 +5,11 @@ import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import ttk
 
-from visualization import ContourPage, OverlayPage, RawPage, XYZPage
+from visualisation.contour_page import ContourPage
+from visualisation.xyz_page import XYZPage
+from visualisation.overlay_page import OverlayPage
+from visualisation.raw_page import RawPage
+
 
 # Log to root logger
 logger = logging.getLogger()
@@ -103,6 +107,10 @@ class MainView(tk.Toplevel):
         self.populate_calc_frame()
         self.create_console()
         self.create_output_tabs()
+        # base = ContourPage(self.output_note)
+        # base.pack(expand=True, fill="both")
+        # self.output_note.add(base, text="Contour Subclass")
+        
 
     def setup_window(self) -> None:
         """

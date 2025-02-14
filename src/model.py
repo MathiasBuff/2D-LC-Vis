@@ -58,6 +58,11 @@ class DataManager:
             blank_time (float, optional): Time value to subtract as blank. Defaults to None.
             callback (callable, optional): Function to call upon completion.
         """
+        try:
+            _ = self.data
+        except AttributeError:
+            logger.error("No data loaded.")
+            return
 
         # Construct time vectors for D1 and D2
         self.ax_D1, self.ax_D2 = self.construct_axes(sampling_time)
