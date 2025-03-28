@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import logging
-import tkinter as tk
 from tkinter import ttk
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from visualisation.base_page import BaseVisualizationPage

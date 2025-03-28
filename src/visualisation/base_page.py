@@ -5,11 +5,12 @@ from abc import abstractmethod, ABC
 import logging
 import tkinter as tk
 from tkinter import ttk
-from tkinter.filedialog import asksaveasfilename
 
 from matplotlib import colormaps
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+
+from file_io import ask_save_parameters
 
 CMAP_LIST = list(colormaps)
 CMAP_DEFAULT = "jet"
@@ -105,28 +106,24 @@ class BaseVisualizationPage(ttk.Frame, ABC):
         self.canvas.draw()
 
     def save_figure(self) -> None:
-        name = asksaveasfilename(
-            filetypes=[
-                ('.png', '*.png'),
-                ('.tiff', '*.tiff'),
-                ('.svg', '*.svg'),
-                ('.pdf', '*.pdf'),
-            ],
-            defaultextension=".png",
-        )
-        if name == "":
+        parameters = ask_save_parameters()
+        if parameters["path"] == "":
             return
 
         fig = self.figure
         axes = fig.axes[0]
         current_size = fig.get_size_inches()
 
-        fig.set_size_inches(12, 9)
-        axes.set_xlabel(axes.get_xlabel(), fontsize=20)
-        axes.set_ylabel(axes.get_ylabel(), fontsize=20)
-        axes.tick_params(axis="both", which="major", labelsize=15)
+        dpi = parameters["dpi"]
+        width = parameters["size"][0] / dpi
+        height = parameters["size"][1] / dpi
+        
+        fig.set_size_inches(width, height)
+        axes.set_xlabel(axes.get_xlabel())
+        axes.set_ylabel(axes.get_ylabel())
+        axes.tick_params(axis="both", which="major")
 
-        fig.savefig(name, dpi=300)
+        fig.savefig(parameters["path"], dpi=dpi)
         self.figure.set_size_inches(current_size)
         
     

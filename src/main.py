@@ -47,12 +47,12 @@ def main():
     AppController(root)
 
     # Close the splash image once everything is loaded
-    try:
-        import pyi_splash
+    # try:
+    #     import pyi_splash
 
-        pyi_splash.close()
-    except Exception as e:
-        logger.debug(f"Tried to close splash screen unsuccessfully : {e}")
+    #     pyi_splash.close()
+    # except Exception as e:
+    #     logger.debug(f"Tried to close splash screen unsuccessfully : {e}")
 
     root.mainloop()
 

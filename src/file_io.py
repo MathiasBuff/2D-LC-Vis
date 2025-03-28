@@ -4,7 +4,7 @@ import logging
 import sys
 from pathlib import Path
 from tkinter import ttk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.simpledialog import Dialog
 
 import pandas as pd
@@ -116,8 +116,127 @@ class OpenExcelDialog(Dialog):
         self.sheet_cb.configure({"values": sheets})
         self.sheet_cb.current(0)
 
+class SaveFigureDialog(Dialog):
+
+    def __init__(self, parent=None, title: str | None = "Save Figure Parameters"):
+        super().__init__(parent, title=title)
+    
+    def body(self, master):
+        """create dialog body.
+
+        return widget that should have initial focus.
+
+        #overridden from simpledialog.Dialog
+        """
+        if getattr(sys, "frozen", False):
+            base_path = sys._MEIPASS
+        else:
+            base_path = "."
+
+        # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
+
+        windowWidth = 350
+        windowHeight = 300
+        screenWidth = master.winfo_screenwidth()
+        screenHeight = master.winfo_screenheight()
+        xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
+        yCoordinate = int((screenHeight / 2) - (windowHeight / 2))
+        self.geometry(f"{windowWidth}x{windowHeight}+{xCoordinate}+{yCoordinate}")
+        self.resizable(False, False)
+
+        paddings = {"padx": 10, "pady": 5}
+
+        path_frame = ttk.Frame(master)
+        size_frame = ttk.Frame(master)
+        dpi_frame = ttk.Frame(master)
+
+        path_frame.grid(column=0, row=0, columnspan=2, sticky="nsew", **paddings)
+        size_frame.grid(column=0, row=1, sticky="nsw", **paddings)
+        dpi_frame.grid(column=1, row=1, sticky="nse", **paddings)
+
+        ttk.Label(path_frame, text="File Path:", anchor="w", width=15).pack(
+            side="top", fill="x", expand="no"
+        )
+
+        self.path_entry = ttk.Entry(path_frame, width=28)
+        self.path_entry.pack(side="left", fill="x", expand="yes")
+        self.path_entry.state(["disabled"])
+        self.path_btn = ttk.Button(
+            path_frame, text="Browse...", width=10, command=self.ask_file_path
+        )
+        self.path_btn.pack(side="right", fill="none", expand="no", padx=5)
+        
+        ttk.Label(size_frame, text="Width x Height (px):", anchor="w").pack(
+            side="top", fill="x", expand="no"
+        )
+        self.width_entry = ttk.Entry(size_frame, width=8)
+        self.width_entry.pack(side="left", fill="x", expand="no")
+        ttk.Label(size_frame, text="x").pack(side="left", fill="none", expand="no")
+        self.height_entry = ttk.Entry(size_frame, width=8)
+        self.height_entry.pack(side="left", fill="x", expand="no")
+        
+        ttk.Label(dpi_frame, text="DPI:", anchor="w", width=5).pack(
+            side="top", fill="x", expand="no"
+        )
+        self.dpi_entry = ttk.Entry(dpi_frame, width=10)
+        self.dpi_entry.pack(side="left", fill="x", expand="no")
+
+        return self.path_btn
+
+    def buttonbox(self):
+        """add standard button box.
+
+        #overridden from simpledialog.Dialog to fit style
+        """
+
+        box = ttk.Frame(self)
+
+        w = ttk.Button(box, text="OK", width=10, command=self.ok)
+        w.configure(style="Accent.TButton")
+        w.pack(side="left", padx=10, pady=5)
+        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w.pack(side="left", padx=10, pady=5)
+
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+
+        box.pack(side="bottom", pady=5)
+
+    def validate(self):
+        try:
+            self.result = {
+                "path": self.path_entry.get(),
+                "size": (float(self.width_entry.get()), float(self.height_entry.get())),
+                "dpi": int(self.dpi_entry.get()),
+            }
+            return True
+        except:
+            return False
+
+    def ask_file_path(self):
+        path = Path(
+            asksaveasfilename(
+                filetypes=[
+                    ('.png', '*.png'),
+                    ('.tiff', '*.tiff'),
+                    ('.svg', '*.svg'),
+                    ('.pdf', '*.pdf'),
+                ],
+                defaultextension=".png",
+            )
+        )
+        self.path_entry.state(["!disabled"])
+        self.path_entry.delete(0)
+        self.path_entry.insert(0, path)
+        self.path_entry.state(["disabled"])
+        self.path = path
 
 def ask_file() -> dict:
-    """get file parameters (path, sheetname, has_headers) from a user"""
+    """get file parameters (path, sheetname, has_headers) from the user"""
     l = OpenExcelDialog()
+    return l.result
+
+def ask_save_parameters() -> dict:
+    """get figure save parameters from the user"""
+    l = SaveFigureDialog()
     return l.result

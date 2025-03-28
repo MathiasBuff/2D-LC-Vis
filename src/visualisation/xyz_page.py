@@ -3,7 +3,6 @@
 import logging
 import tkinter as tk
 from tkinter import ttk
-from tkinter.colorchooser import askcolor
 
 import matplotlib.pyplot as plt
 import numpy as np
