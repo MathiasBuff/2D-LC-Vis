@@ -40,24 +40,23 @@ class ContourPage(BaseVisualizationPage):
     
     def create_parameters(self):
         
-        d1_frame = ttk.Frame(self.param_frame, padding=(10, 0))
-        d2_frame = ttk.Frame(self.param_frame, padding=(10, 0))
-        intensity_frame = ttk.Frame(self.param_frame, padding=(10, 0))
+        zoom_frame = ttk.Labelframe(self.param_frame, text="Zoom")
         
-        colors_frame = ttk.Frame(self.param_frame, padding=(10, 0))
+        d1_frame = ttk.Frame(zoom_frame, padding=(10, 0))
+        d2_frame = ttk.Frame(zoom_frame, padding=(10, 0))
+        intensity_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         
-        d1_frame.grid(column=0, row=0)
-        d2_frame.grid(column=1, row=0)
-        intensity_frame.grid(column=2, row=0)
+        colors_frame = ttk.Labelframe(self.param_frame, text="Coloring (Scale)", padding=(10, 0))
         
-        ttk.Separator(self.param_frame, orient="vertical").grid(
-            column=3, row=0, rowspan=2, sticky="ns", padx=2
-        )
+        d1_frame.grid(column=0, row=0, sticky="nsew", pady=5)
+        d2_frame.grid(column=1, row=0, sticky="nsew", pady=5)
+        intensity_frame.grid(column=2, row=0, sticky="nsew", pady=5)
         
-        colors_frame.grid(column=4, row=0)
+        zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
+        colors_frame.grid(column=1, row=0, sticky="nsew", padx=5)
         
         
-        ttk.Label(d1_frame, text="D1 range (min):", width=15, anchor="w").grid(
+        ttk.Label(d1_frame, text="D1 range (min)", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
         self.y_min = ttk.Entry(d1_frame, width=7)
@@ -69,7 +68,7 @@ class ContourPage(BaseVisualizationPage):
         self.y_max.grid(column=2, row=1)
         
         
-        ttk.Label(d2_frame, text="D2 range (s):", width=15, anchor="w").grid(
+        ttk.Label(d2_frame, text="D2 range (s)", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
         self.x_min = ttk.Entry(d2_frame, width=7)
@@ -81,7 +80,7 @@ class ContourPage(BaseVisualizationPage):
         self.x_max.grid(column=2, row=1)
         
         
-        ttk.Label(intensity_frame, text="Intensity range:", width=15, anchor="w").grid(
+        ttk.Label(intensity_frame, text="Intensity range", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
         self.z_min = ttk.Entry(intensity_frame, width=7)
@@ -94,7 +93,7 @@ class ContourPage(BaseVisualizationPage):
         
         
 
-        ttk.Label(colors_frame, text="Colormap:", width=15, anchor="w").grid(
+        ttk.Label(colors_frame, text="Colormap", width=15, anchor="w").grid(
             column=0, row=0, sticky="w"
         )
         self.cmap_cb = ttk.Combobox(
@@ -102,7 +101,7 @@ class ContourPage(BaseVisualizationPage):
         )
         self.cmap_cb.grid(column=0, row=1, padx=(0, 10))
 
-        ttk.Label(colors_frame, text="Extremes:", width=8, anchor="w").grid(
+        ttk.Label(colors_frame, text="Extremes", width=8, anchor="w").grid(
             column=1, row=0, columnspan=2, sticky="w"
         )
 
@@ -130,10 +129,10 @@ class ContourPage(BaseVisualizationPage):
         )
         self.color_over_btn.place(relw=0.7, relh=0.7, relx=0.14, rely=0.14)
         
-        ttk.Label(colors_frame, text="Lines:", width=8, anchor="w").grid(
+        ttk.Label(colors_frame, text="Levels count", width=12, anchor="w").grid(
             column=3, row=0, sticky="w", padx=(10, 0)
         )
-        self.line_count = ttk.Entry(colors_frame, width=8)
+        self.line_count = ttk.Entry(colors_frame, width=12)
         self.line_count.insert(0, self.parameters["lines"])
         self.line_count.grid(column=3, row=1, padx=(10, 0))
         

@@ -69,7 +69,7 @@ class MainView(tk.Toplevel):
 
     WINDOW_WIDTH = 1280
     WINDOW_HEIGHT = 720
-    PADDINGS = {"padx": 10, "pady": 10}
+    PADDINGS = {"padx": 8, "pady": (2, 6)}
     LOGGING_LEVEL = logging.INFO
 
     def __init__(self, master: tk.Tk):
@@ -251,13 +251,13 @@ class MainView(tk.Toplevel):
         """
         # Sampling Time Frame
         st_frame = ttk.Frame(self.calc_frame)
-        self.st_entry = ttk.Entry(st_frame)
+        self.st_entry = ttk.Entry(st_frame, width=8)
 
         # Blank Subtraction Frame
         blank_frame = ttk.Frame(self.calc_frame)
         self.blk_checkbox = ttk.Checkbutton(blank_frame)
         self.blk_checkbox.state(["!alternate"])
-        self.blk_entry = ttk.Entry(blank_frame)
+        self.blk_entry = ttk.Entry(blank_frame, width=8)
         self.blk_entry.insert(tk.END, "0")
 
         # Process Data Button
@@ -269,6 +269,14 @@ class MainView(tk.Toplevel):
                 "widget": st_frame,
                 "pack": {
                     "side": "top",
+                    "expand": False,
+                    "fill": "none",
+                },
+            },
+            {
+                "widget": self.process_btn,
+                "pack": {
+                    "side": "bottom",
                     "expand": False,
                     "fill": "both",
                 },
@@ -286,17 +294,17 @@ class MainView(tk.Toplevel):
             {
                 "widget": self.st_entry,
                 "pack": {
-                    "side": "right",
-                    "expand": True,
+                    "side": "left",
+                    "expand": False,
                     "fill": "none",
                 },
             },
             {
                 "widget": blank_frame,
                 "pack": {
-                    "side": "top",
+                    "side": "left",
                     "expand": False,
-                    "fill": "both",
+                    "fill": "none",
                 },
             },
             {
@@ -311,30 +319,31 @@ class MainView(tk.Toplevel):
                 "grid": {
                     "row": 0,
                     "column": 1,
-                    "sticky": "nsew",
+                    "columnspan": 2,
+                    "sticky": "ew",
                 },
             },
             {
                 "widget": self.blk_entry,
                 "grid": {
                     "row": 1,
-                    "column": 1,
-                    "sticky": "nsw",
+                    "column": 0,
+                    "columnspan": 2,
                 },
             },
             {
-                "widget": self.process_btn,
-                "pack": {
-                    "side": "top",
-                    "expand": False,
-                    "fill": "both",
+                "widget": ttk.Label(blank_frame, text="???"),
+                "grid": {
+                    "row": 1,
+                    "column": 2,
+                    "sticky": "ew",
                 },
             },
         ]
 
         # Place the widgets using the place_widgets() utility method
         self.place_widgets(layout_config)
-        blank_frame.columnconfigure(1, weight=1)
+        blank_frame.columnconfigure(2, weight=1)
 
     def create_console(self) -> None:
         """
@@ -351,7 +360,7 @@ class MainView(tk.Toplevel):
             console (ScrolledText): A scrollable text area for displaying log messages.
         """
         console = ScrolledText.ScrolledText(
-            self.console_frame, width=15, height=20, state="disabled"
+            self.console_frame, width=10, height=20, state="disabled"
         )
         console.configure(font="Calibri")
         console.pack(side="bottom", expand=True, fill="both", **self.PADDINGS)

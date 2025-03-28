@@ -46,11 +46,11 @@ class BaseVisualizationPage(ttk.Frame, ABC):
     def body(self) -> None:
         self.figure = Figure(figsize=(6, 4), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
-        self.param_frame = ttk.LabelFrame(self, text="Graph Settings")
+        self.param_frame = ttk.LabelFrame(self, text="Graph Settings", padding=(10, 0))
         buttons_frame = ttk.Frame(self)
                 
         self.canvas.get_tk_widget().pack(side="top", fill="both", expand=True)
-        self.param_frame.pack(side="top", fill="x", expand=False, ipady=10)
+        self.param_frame.pack(side="top", fill="both", expand=False, ipady=5)
         buttons_frame.pack(side="top", fill="x", expand=False, ipady=10)
         
         ttk.Button(buttons_frame, text="Apply", command=self.update_figure).pack(
@@ -59,7 +59,7 @@ class BaseVisualizationPage(ttk.Frame, ABC):
         ttk.Button(buttons_frame, text="Reset", command=self.reset_parameters).pack(
             side="left", fill="none", expand=False, padx=10
         )        
-        ttk.Button(buttons_frame, text="Save", command=self.save_figure).pack(
+        ttk.Button(buttons_frame, text="Save Figure", command=self.save_figure).pack(
             side="right", fill="none", expand=False
         )
 
