@@ -17,7 +17,16 @@ class OpenExcelDialog(Dialog):
     """Class to create a Excel File opening dialog."""
 
     def __init__(self, parent=None, title: str | None = "Open Excel File"):
+        
+        self.manual_text = """Please select a valid Excel file with the "Browse..." button
+
+The file should contain a sheet with only the data stored in the first two columns, and optionnaly column headers on the first line.
+If the columns have headers, please select the "Ignore first line" option.
+
+Then, please select the appropriate sheet and click the "OK" button"""
+        
         super().__init__(parent, title=title)
+        
 
     def body(self, master):
         """create dialog body.
@@ -33,8 +42,8 @@ class OpenExcelDialog(Dialog):
 
         # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
-        windowWidth = 300
-        windowHeight = 250
+        windowWidth = 360
+        windowHeight = 425
         screenWidth = master.winfo_screenwidth()
         screenHeight = master.winfo_screenheight()
         xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
@@ -43,6 +52,17 @@ class OpenExcelDialog(Dialog):
         self.resizable(False, False)
 
         paddings = {"padx": 5, "pady": 10}
+
+        manual_frame = ttk.Frame(self)
+        manual_frame.pack(side="top", expand="yes", fill="both", **paddings)
+        
+        manual = ttk.Label(
+            manual_frame,
+            text=self.manual_text,
+            justify="left",
+            wraplength=350,
+        )
+        manual.pack(expand=True, fill="both")
 
         path_frame = ttk.Frame(self)
         header_frame = ttk.Frame(self)
@@ -58,8 +78,8 @@ class OpenExcelDialog(Dialog):
         ttk.Label(header_frame, text="Ignore first line", anchor="w", width=15).pack(
             side="right", fill="x", expand="yes"
         )
-        ttk.Label(worksheet_frame, text="Worksheet:", anchor="w", width=15).pack(
-            side="left", fill="x", expand="yes"
+        ttk.Label(worksheet_frame, text="Worksheet:", anchor="w", width=10).pack(
+            side="left", fill="none", expand="no"
         )
 
         self.path_entry = ttk.Entry(path_frame)
@@ -73,7 +93,7 @@ class OpenExcelDialog(Dialog):
         self.head_chck.state(["!alternate"])
         self.head_chck.pack(side="left", fill="none", expand="no")
         self.sheet_cb = ttk.Combobox(worksheet_frame, state="readonly")
-        self.sheet_cb.pack(side="right", fill="x", expand="no", padx=5)
+        self.sheet_cb.pack(side="left", fill="x", expand="no", padx=5)
 
         return self.path_btn
 
