@@ -198,6 +198,15 @@ class XYZPage(BaseVisualizationPage):
             cmap=cmap
         )
         cbar = self.figure.colorbar(cs, pad=0.1)
+                
+        cbar.ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 4), useOffset=False)
+                        
+        labels = [
+            float(f"{tick:0<3.1e}")
+            for tick
+            in cbar.ax.get_yticks()
+            ]
+        cbar.ax.set_yticks(labels)
 
         return super().draw_axes()
 

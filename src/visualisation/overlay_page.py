@@ -118,9 +118,10 @@ class OverlayPage(BaseVisualizationPage):
 
         for i, line in enumerate(self.data["z"]):
             if self.data["y"][i] >= self.parameters["y_min"] and self.data["y"][i] <= self.parameters["y_max"]:
-                axes.plot(self.data["x"], line, label=f"{self.data["y"][i]:.2f} min")
+                axes.plot(self.data["x"], line, label=f"{self.data["y"][i]:3.1f} min")
         box = axes.get_position()
         axes.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-        axes.legend(bbox_to_anchor=(1, 1.03), loc="upper left")
+        axes.legend(bbox_to_anchor=(1, 1.03), loc="upper left", fontsize=8)
+        
 
         return super().draw_axes()
