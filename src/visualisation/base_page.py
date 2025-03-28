@@ -93,7 +93,7 @@ class BaseVisualizationPage(ttk.Frame, ABC):
             entry.delete(0, "end")
         
         # Reset parameters to an empty dict
-        self.parameters = self.DEFAULT_PARAMETERS
+        self.parameters = self.DEFAULT_PARAMETERS.copy()        
         self.update_figure()
 
     def update_figure(self) -> None:

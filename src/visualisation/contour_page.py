@@ -27,7 +27,7 @@ class ContourPage(BaseVisualizationPage):
 
     def __init__(self, master):     
         super().__init__(master)
-        self.parameters = self.DEFAULT_PARAMETERS
+        self.parameters = self.DEFAULT_PARAMETERS.copy()
                 
         self.create_parameters()
         
@@ -37,7 +37,7 @@ class ContourPage(BaseVisualizationPage):
             "z": np.array([[0, 0.5], [0.5, 1]]),
         }
         self.update_figure()
-        
+    
     def create_parameters(self):
         
         d1_frame = ttk.Frame(self.param_frame, padding=(10, 0))
