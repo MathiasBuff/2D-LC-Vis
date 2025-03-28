@@ -283,7 +283,7 @@ class MainView(tk.Toplevel):
             },
             {
                 "widget": ttk.Label(
-                    st_frame, text="Sampling time (min) :", anchor="w", width=20
+                    st_frame, text="Sampling time [min] :", anchor="w", width=20
                 ),
                 "pack": {
                     "side": "left",
@@ -315,7 +315,7 @@ class MainView(tk.Toplevel):
                 },
             },
             {
-                "widget": ttk.Label(blank_frame, text="Blank Substraction", anchor="w"),
+                "widget": ttk.Label(blank_frame, text="Blank Substraction [min]", anchor="w"),
                 "grid": {
                     "row": 0,
                     "column": 1,

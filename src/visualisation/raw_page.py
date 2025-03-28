@@ -37,7 +37,7 @@ class RawPage(BaseVisualizationPage):
         intensity_frame.grid(column=1, row=0, sticky="nsew", pady=5)
         
                 
-        ttk.Label(d1_frame, text="Time range (min)", width=15, anchor="w").grid(
+        ttk.Label(d1_frame, text="Time range [min]", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
         self.x_min = ttk.Entry(d1_frame, width=7)
