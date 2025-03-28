@@ -113,15 +113,16 @@ class BaseVisualizationPage(ttk.Frame, ABC):
         fig = self.figure
         axes = fig.axes[0]
         current_size = fig.get_size_inches()
-
+        
+        cm_to_inches = 1 / 2.54
+        
         dpi = parameters["dpi"]
-        width = parameters["size"][0] / dpi
-        height = parameters["size"][1] / dpi
+        width = parameters["size"][0] * cm_to_inches
+        height = parameters["size"][1] * cm_to_inches
         
         fig.set_size_inches(width, height)
         axes.set_xlabel(axes.get_xlabel())
         axes.set_ylabel(axes.get_ylabel())
-        axes.tick_params(axis="both", which="major")
 
         fig.savefig(parameters["path"], dpi=dpi)
         self.figure.set_size_inches(current_size)

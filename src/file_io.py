@@ -18,7 +18,7 @@ class OpenExcelDialog(Dialog):
 
     def __init__(self, parent=None, title: str | None = "Open Excel File"):
         
-        self.manual_text = """Please select a valid Excel file with the "Browse..." button
+        self.manual_text = """Please select a valid Excel file with the "Browse..." button.
 
 The file should contain a sheet with only the data stored in the first two columns, and optionnaly column headers on the first line.
 If the columns have headers, please select the "Ignore first line" option.
@@ -139,6 +139,15 @@ Then, please select the appropriate sheet and click the "OK" button"""
 class SaveFigureDialog(Dialog):
 
     def __init__(self, parent=None, title: str | None = "Save Figure Parameters"):
+        
+        self.manual_text = """Please select the file path with the "Browse..." button.
+
+You can accept default values as set below or change them manually.
+The size values correspond to the image size *on print*.
+Please note that width lower than 12 cm or height lower than 6 cm may lead to problems with figure boundaries.
+
+Once parameters are as wanted, click the "OK" button to save the figure."""
+        
         super().__init__(parent, title=title)
     
     def body(self, master):
@@ -155,8 +164,8 @@ class SaveFigureDialog(Dialog):
 
         # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
-        windowWidth = 350
-        windowHeight = 300
+        windowWidth = 360
+        windowHeight = 390
         screenWidth = master.winfo_screenwidth()
         screenHeight = master.winfo_screenheight()
         xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
@@ -165,6 +174,17 @@ class SaveFigureDialog(Dialog):
         self.resizable(False, False)
 
         paddings = {"padx": 10, "pady": 5}
+
+        manual_frame = ttk.Frame(self)
+        manual_frame.pack(side="top", expand="yes", fill="both", **paddings)
+        
+        manual = ttk.Label(
+            manual_frame,
+            text=self.manual_text,
+            justify="left",
+            wraplength=340,
+        )
+        manual.pack(expand=True, fill="both")
 
         path_frame = ttk.Frame(master)
         size_frame = ttk.Frame(master)
@@ -186,7 +206,7 @@ class SaveFigureDialog(Dialog):
         )
         self.path_btn.pack(side="right", fill="none", expand="no", padx=5)
         
-        ttk.Label(size_frame, text="Width x Height (px):", anchor="w").pack(
+        ttk.Label(size_frame, text="Width x Height [cm]:", anchor="w").pack(
             side="top", fill="x", expand="no"
         )
         self.width_entry = ttk.Entry(size_frame, width=8)
@@ -200,6 +220,10 @@ class SaveFigureDialog(Dialog):
         )
         self.dpi_entry = ttk.Entry(dpi_frame, width=10)
         self.dpi_entry.pack(side="left", fill="x", expand="no")
+        
+        self.width_entry.insert(0, "20.0")
+        self.height_entry.insert(0, "15.0")
+        self.dpi_entry.insert(0, "300")
 
         return self.path_btn
 
