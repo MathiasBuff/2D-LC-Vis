@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import logging
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
@@ -11,10 +12,15 @@ from visualisation.xyz_page import XYZPage
 from visualisation.overlay_page import OverlayPage
 from visualisation.raw_page import RawPage
 
+# Handle case where app is running as executable
+if getattr(sys, "frozen", False):
+    base_path = sys._MEIPASS
+else:
+    base_path = "."
 
 # Log to root logger
 logger = logging.getLogger()
-help_img = Image.open("utils\\help.png").resize((16,16))
+help_img = Image.open(f"{base_path}\\utils\\help.png").resize((16,16))
 
 class TextHandler(logging.Handler):
     """
@@ -131,7 +137,7 @@ class MainView(tk.Toplevel):
         # Build the window layout and initialize components
         self.body()
 
-        logger.info("2D-LC Visualizer version 0.2.0")
+        logger.info("2D-LC Visualizer version 0.3.0")
         logger.info("-" * 42)
 
         # Bind exit events for closing the application

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from abc import abstractmethod, ABC
-
+import sys
 import logging
 import tkinter as tk
 from tkinter import ttk
@@ -16,9 +16,15 @@ from file_io import ask_save_parameters
 CMAP_LIST = list(colormaps)
 CMAP_DEFAULT = "jet"
 
+# Handle case where app is running as executable
+if getattr(sys, "frozen", False):
+    base_path = sys._MEIPASS
+else:
+    base_path = "."
+
 # Use root logger
 logger = logging.getLogger(__name__)
-help_img = Image.open("utils\\help.png").resize((16,16))
+help_img = Image.open(f"{base_path}\\utils\\help.png").resize((16,16))
 
 class ToolTip(object):
 
