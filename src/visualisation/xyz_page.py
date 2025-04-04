@@ -193,6 +193,7 @@ class XYZPage(BaseVisualizationPage):
         axes.set_zlim(self.parameters["z_min"], self.parameters["z_max"])
         axes.set_xlabel("D2 [s]")
         axes.set_ylabel("D1 [min]")
+        axes.set_zlabel("Intensity")
 
         levels = np.linspace(
             self.parameters["z_min"],
@@ -208,7 +209,7 @@ class XYZPage(BaseVisualizationPage):
             cmap=cmap
         )
         cbar = self.figure.colorbar(cs, pad=0.1)
-                
+        cbar.set_label("Intensity", labelpad=-5, y=1.05, rotation="horizontal")
         cbar.ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 4), useOffset=False)
                         
         labels = [

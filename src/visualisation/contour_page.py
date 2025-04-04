@@ -225,6 +225,7 @@ class ContourPage(BaseVisualizationPage):
 
         cs = axes.contourf(self.data["x"], self.data["y"], self.data["z"], levels, cmap=cmap, extend="both")
         cbar = self.figure.colorbar(cs)
+        cbar.set_label("Intensity", labelpad=-5, y=1.05, rotation="horizontal")
         
         cbar.ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 4), useOffset=False)
                         
