@@ -6,7 +6,6 @@ from tkinter import ttk
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import colormaps
 
 from visualisation.base_page import BaseVisualizationPage, create_tooltip
 
@@ -15,7 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class XYZPage(BaseVisualizationPage):
-    CMAP_LIST = list(colormaps)
+    CMAP_LIST = [
+        "jet", "turbo", "viridis", "cividis", "plasma", "inferno", "magma",
+        "gray", "gray_r", "hot", "hot_r", "cool", "cool_r",
+        "Spectral", "coolwarm", "nipy_spectral", "gnuplot", "gnuplot2"
+    ]
     DEFAULT_PARAMETERS = {
         "cmap": "jet",
         "lines": 100,
