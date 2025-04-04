@@ -5,7 +5,7 @@ from tkinter import ttk
 
 import numpy as np
 
-from visualisation.base_page import BaseVisualizationPage
+from visualisation.base_page import BaseVisualizationPage, create_tooltip
 
 # Use root logger
 logger = logging.getLogger(__name__)
@@ -33,11 +33,15 @@ class OverlayPage(BaseVisualizationPage):
         d2_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         intensity_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         
+        help_ovl_zoom = ttk.Label(zoom_frame, image=self.help_img_tk)
+        create_tooltip(help_ovl_zoom, "D1 range: Set the limits of the chromatograms displayed\nD2 range: Set limits of the D2 axis\nIntensity range: Set limits of the Intensity axis")
+        
         zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
         
-        d1_frame.grid(column=0, row=0, sticky="nsew", pady=5)
-        d2_frame.grid(column=1, row=0, sticky="nsew", pady=5)
-        intensity_frame.grid(column=2, row=0, sticky="nsew", pady=5)
+        help_ovl_zoom.grid(column=0, row=0, sticky="nw", padx=5)
+        d1_frame.grid(column=0, row=1, sticky="nsew", pady=5)
+        d2_frame.grid(column=1, row=1, sticky="nsew", pady=5)
+        intensity_frame.grid(column=2, row=1, sticky="nsew", pady=5)
         
                 
         ttk.Label(d1_frame, text="D1 range [min]", width=15, anchor="w").grid(

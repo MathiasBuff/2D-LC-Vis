@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colormaps
 
-from visualisation.base_page import BaseVisualizationPage
+from visualisation.base_page import BaseVisualizationPage, create_tooltip
 
 # Use root logger
 logger = logging.getLogger(__name__)
@@ -38,15 +38,19 @@ class XYZPage(BaseVisualizationPage):
         
         zoom_frame = ttk.Labelframe(self.param_frame, text="Zoom")
         
+        help_xyz_zoom = ttk.Label(zoom_frame, image=self.help_img_tk)
+        create_tooltip(help_xyz_zoom, "D1 range: Set limits of the D1 axis\nD2 range: Set limits of the D2 axis\nIntensity range: Set limits of the Intensity axis")
+        
         d1_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         d2_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         intensity_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         
         colors_frame = ttk.Labelframe(self.param_frame, text="Coloring (Scale)", padding=(10, 0))
         
-        d1_frame.grid(column=0, row=0, sticky="nsew", pady=5)
-        d2_frame.grid(column=1, row=0, sticky="nsew", pady=5)
-        intensity_frame.grid(column=2, row=0, sticky="nsew", pady=5)
+        help_xyz_zoom.grid(column=0, row=0, sticky="nw", padx=5)
+        d1_frame.grid(column=0, row=1, sticky="nsew", pady=5)
+        d2_frame.grid(column=1, row=1, sticky="nsew", pady=5)
+        intensity_frame.grid(column=2, row=1, sticky="nsew", pady=5)
         
         zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
         colors_frame.grid(column=1, row=0, sticky="nsew", padx=5)
@@ -88,34 +92,37 @@ class XYZPage(BaseVisualizationPage):
         self.z_max.grid(column=2, row=1)
         
         
+        help_xyz_colors = ttk.Label(colors_frame, image=self.help_img_tk)
+        create_tooltip(help_xyz_colors, "Colormap: The colors that will be used to represent Intensity values\nLevels count: Higher count provides better resolution for sharp changes in intensity, but will make image drawing slower.")
+        help_xyz_colors.grid(column=0, row=0, sticky="nw")
 
         ttk.Label(colors_frame, text="Colormap", width=15, anchor="w").grid(
-            column=0, row=0, sticky="w"
+            column=0, row=1, sticky="w"
         )
         self.cmap_cb = ttk.Combobox(
             colors_frame, values=self.CMAP_LIST, state="readonly", width=15
         )
-        self.cmap_cb.grid(column=0, row=1, padx=(0, 10))
+        self.cmap_cb.grid(column=0, row=2, padx=(0, 10))
 
         ttk.Label(colors_frame, text="", width=8, anchor="w").grid(
-            column=1, row=0, columnspan=2, sticky="w"
+            column=1, row=1, columnspan=2, sticky="w"
         )
 
         tk.Frame(
             colors_frame, height=25, width=25
-        ).grid(column=1, row=1, padx=2)
+        ).grid(column=1, row=2, padx=2)
         
         tk.Frame(
             colors_frame, height=25, width=25
-        ).grid(column=2, row=1, padx=2)
+        ).grid(column=2, row=2, padx=2)
         
         
         ttk.Label(colors_frame, text="Levels count", width=12, anchor="w").grid(
-            column=3, row=0, sticky="w", padx=(10, 0)
+            column=3, row=1, sticky="w", padx=(10, 0)
         )
         self.line_count = ttk.Entry(colors_frame, width=10)
         self.line_count.insert(0, self.parameters["lines"])
-        self.line_count.grid(column=3, row=1, padx=(10, 0))
+        self.line_count.grid(column=3, row=2, padx=(10, 0))
         
         self.cmap_cb.current(self.CMAP_LIST.index(self.parameters["cmap"]))
         self.cmap_cb.bind("<<ComboboxSelected>>", self.cb_highlight_clear)

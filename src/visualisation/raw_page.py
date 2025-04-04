@@ -5,7 +5,7 @@ from tkinter import ttk
 
 import numpy as np
 
-from visualisation.base_page import BaseVisualizationPage
+from visualisation.base_page import BaseVisualizationPage, create_tooltip
 
 # Use root logger
 logger = logging.getLogger(__name__)
@@ -31,10 +31,14 @@ class RawPage(BaseVisualizationPage):
         d1_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         intensity_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         
+        help_raw_zoom = ttk.Label(zoom_frame, image=self.help_img_tk)
+        create_tooltip(help_raw_zoom, "Time range: Set limits of the Time axis\nIntensity range: Set limits of the Intensity axis")
+        
         zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
         
-        d1_frame.grid(column=0, row=0, sticky="nsew", pady=5)
-        intensity_frame.grid(column=1, row=0, sticky="nsew", pady=5)
+        help_raw_zoom.grid(column=0, row=0, sticky="nw", padx=5)
+        d1_frame.grid(column=0, row=1, sticky="nsew", pady=5)
+        intensity_frame.grid(column=1, row=1, sticky="nsew", pady=5)
         
                 
         ttk.Label(d1_frame, text="Time range [min]", width=15, anchor="w").grid(

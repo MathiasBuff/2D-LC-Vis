@@ -4,6 +4,7 @@ import logging
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 from visualisation.contour_page import ContourPage
 from visualisation.xyz_page import XYZPage
@@ -13,7 +14,7 @@ from visualisation.raw_page import RawPage
 
 # Log to root logger
 logger = logging.getLogger()
-
+help_img = Image.open("utils\\help.png").resize((16,16))
 
 class TextHandler(logging.Handler):
     """
@@ -57,6 +58,45 @@ class TextHandler(logging.Handler):
         self.text.after(0, append)
 
 
+class ToolTip(object):
+
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+
+    def showtip(self, text):
+        "Display text in tooltip window"
+        self.text = text
+        if self.tipwindow or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 20
+        y = y + cy + self.widget.winfo_rooty() + 15
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(tw, text=self.text, justify="left", wraplength=200,
+                      background="#ffffe0", relief="solid", borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+def create_tooltip(widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(text)
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind('<Enter>', enter)
+    widget.bind('<Leave>', leave)
+
 class MainView(tk.Toplevel):
     """
     MainView is responsible for constructing and managing the GUI layout of the 2D-LC Chromatogram Visualization app.
@@ -86,6 +126,7 @@ class MainView(tk.Toplevel):
         master.withdraw()
 
         self.data = None
+        self.help_img_tk = ImageTk.PhotoImage(help_img)
 
         # Build the window layout and initialize components
         self.body()
@@ -252,6 +293,8 @@ class MainView(tk.Toplevel):
         # Sampling Time Frame
         st_frame = ttk.Frame(self.calc_frame)
         self.st_entry = ttk.Entry(st_frame, width=8)
+        help_st = ttk.Label(st_frame, image=self.help_img_tk)
+        create_tooltip(help_st, "Required parameter: the sampling time as set in your 2D method. If you notice the figure looks slanted, try adjusting the sampling time slightly.")
 
         # Blank Subtraction Frame
         blank_frame = ttk.Frame(self.calc_frame)
@@ -259,9 +302,13 @@ class MainView(tk.Toplevel):
         self.blk_checkbox.state(["!alternate"])
         self.blk_entry = ttk.Entry(blank_frame, width=8)
         self.blk_entry.insert(tk.END, "0")
+        help_blk = ttk.Label(blank_frame, image=self.help_img_tk)
+        create_tooltip(help_blk, "If the checkbox is ticked, the chromatogram matching the time indicated along D1 will be used as blank and substracted from all the others.")
 
         # Process Data Button
         self.process_btn = ttk.Button(self.calc_frame, text="Process Data")
+        help_prc = ttk.Label(self.calc_frame, image=self.help_img_tk)
+        create_tooltip(help_prc, "This button processes the raw data currently loaded with the parameters above. If you change the parameters, please click this button again to reprocess the data.")
 
         # Layout configuration for input fields and controls
         layout_config = [
@@ -272,18 +319,34 @@ class MainView(tk.Toplevel):
                     "expand": False,
                     "fill": "none",
                 },
+            },            
+            {
+                "widget": blank_frame,
+                "pack": {
+                    "side": "top",
+                    "expand": False,
+                    "fill": "x",
+                },
             },
             {
                 "widget": self.process_btn,
                 "pack": {
-                    "side": "bottom",
+                    "side": "left",
+                    "expand": True,
+                    "fill": "x",
+                },
+            },
+            {
+                "widget": help_prc,
+                "pack": {
+                    "side": "right",
                     "expand": False,
-                    "fill": "both",
+                    "fill": "none",
                 },
             },
             {
                 "widget": ttk.Label(
-                    st_frame, text="Sampling time [min] :", anchor="w", width=20
+                    st_frame, text="Sampling time [min]", anchor="w", width=17
                 ),
                 "pack": {
                     "side": "left",
@@ -300,7 +363,7 @@ class MainView(tk.Toplevel):
                 },
             },
             {
-                "widget": blank_frame,
+                "widget": help_st,
                 "pack": {
                     "side": "left",
                     "expand": False,
@@ -332,11 +395,11 @@ class MainView(tk.Toplevel):
                 },
             },
             {
-                "widget": ttk.Label(blank_frame, text="???"),
+                "widget": help_blk,
                 "grid": {
                     "row": 1,
                     "column": 2,
-                    "sticky": "ew",
+                    "sticky": "w",
                 },
             },
         ]

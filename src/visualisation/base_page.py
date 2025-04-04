@@ -5,6 +5,7 @@ from abc import abstractmethod, ABC
 import logging
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 from matplotlib import colormaps
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -17,7 +18,47 @@ CMAP_DEFAULT = "jet"
 
 # Use root logger
 logger = logging.getLogger(__name__)
+help_img = Image.open("utils\\help.png").resize((16,16))
 
+class ToolTip(object):
+
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+
+    def showtip(self, text):
+        "Display text in tooltip window"
+        self.text = text
+        delta = (len(text) / 40) * 14
+        if self.tipwindow or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 20
+        y = y + cy + self.widget.winfo_rooty() - delta
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(tw, text=self.text, justify="left", wraplength=200,
+                      background="#ffffe0", relief="solid", borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+def create_tooltip(widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(text)
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind('<Enter>', enter)
+    widget.bind('<Leave>', leave)
 
 class BaseVisualizationPage(ttk.Frame, ABC):
     """
@@ -40,6 +81,7 @@ class BaseVisualizationPage(ttk.Frame, ABC):
         
         self.data = {}
         self.parameters = {}
+        self.help_img_tk = ImageTk.PhotoImage(help_img)
         
         self.body()
 
@@ -57,11 +99,18 @@ class BaseVisualizationPage(ttk.Frame, ABC):
             side="left", fill="none", expand=False
         )
         ttk.Button(buttons_frame, text="Reset", command=self.reset_parameters).pack(
-            side="left", fill="none", expand=False, padx=10
-        )        
-        ttk.Button(buttons_frame, text="Save Figure", command=self.save_figure).pack(
-            side="right", fill="none", expand=False
+            side="left", fill="none", expand=False, padx=(10,5)
         )
+        help_apply = ttk.Label(buttons_frame, image=self.help_img_tk)
+        help_apply.pack(side="left")
+        create_tooltip(help_apply, "The 'Apply' button must be clicked to redraw the figure using the settings above. The 'Reset' button allows you to restore default parameters.")
+        
+        ttk.Button(buttons_frame, text="Save Figure", command=self.save_figure).pack(
+            side="left", fill="none", expand=False, padx=(50, 5)
+        )
+        help_save = ttk.Label(buttons_frame, image=self.help_img_tk)
+        help_save.pack(side="left")
+        create_tooltip(help_save, "This button allows you to export the currently displayed figure as a file. When clicked, a popup will appear to let you choose export parameters such as dimensions and resolution.")
 
     @abstractmethod
     def create_parameters(self) -> None:
