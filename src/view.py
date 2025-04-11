@@ -83,7 +83,7 @@ class ToolTip(object):
         self.tipwindow = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(1)
         tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(tw, text=self.text, justify="left", wraplength=200,
+        label = tk.Label(tw, text=self.text, justify="left", wraplength=300,
                       background="#ffffe0", relief="solid", borderwidth=1,
                       font=("tahoma", "8", "normal"))
         label.pack(ipadx=1)
@@ -137,7 +137,7 @@ class MainView(tk.Toplevel):
         # Build the window layout and initialize components
         self.body()
 
-        logger.info("2D-LC Visualizer version 0.3.0")
+        logger.info("2D-LC Visualizer version 0.3.1")
         logger.info("-" * 42)
 
         # Bind exit events for closing the application
@@ -300,7 +300,15 @@ class MainView(tk.Toplevel):
         st_frame = ttk.Frame(self.calc_frame)
         self.st_entry = ttk.Entry(st_frame, width=8)
         help_st = ttk.Label(st_frame, image=self.help_img_tk)
-        create_tooltip(help_st, "Required parameter: the sampling time as set in your 2D method. If you notice the figure looks slanted, try adjusting the sampling time slightly.")
+        create_tooltip(
+            help_st,
+            """The sampling time (also called cycle time or modulation time) is based on the 2D gradient time, the 2D equilibration time, and the active solvent modulation time (if applicable). It represents the total analysis time in the second dimension, which also corresponds to the duration of each cut in the first dimension. The indicated sampling time needs to be precise to ensure the right visualization of the data.
+
+Tip for adjustments: if you notice that the data points at the dead volume region in 2D appear shifted or misaligned, you can fine-tune the sampling time slightly until the alignment looks correct.
+
+For Agilent users: the data acquisition software displays the sampling time in minutes by default. However, if you hover your mouse over the value, the exact value in seconds appears. The recommendation is to manually convert the accurate time in seconds back into minutes. This is important because the rounded value shown in minutes can sometimes lack precision, particularly when active solvent modulation is used.
+"""
+            )
 
         # Blank Subtraction Frame
         blank_frame = ttk.Frame(self.calc_frame)
@@ -309,7 +317,12 @@ class MainView(tk.Toplevel):
         self.blk_entry = ttk.Entry(blank_frame, width=8)
         self.blk_entry.insert(tk.END, "0")
         help_blk = ttk.Label(blank_frame, image=self.help_img_tk)
-        create_tooltip(help_blk, "If the checkbox is ticked, the chromatogram matching the time indicated along D1 will be used as blank and substracted from all the others.")
+        create_tooltip(
+            help_blk,
+            """When this checkbox is selected, the tool will use the 2D chromatogram corresponding to the 1D time you specify in the input box as a blank.
+This blank chromatogram will then be subtracted from all other 2D chromatograms during the processing.
+"""
+            )
 
         # Process Data Button
         self.process_btn = ttk.Button(self.calc_frame, text="Process Data")

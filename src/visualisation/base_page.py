@@ -109,7 +109,7 @@ class BaseVisualizationPage(ttk.Frame, ABC):
         )
         help_apply = ttk.Label(buttons_frame, image=self.help_img_tk)
         help_apply.pack(side="left")
-        create_tooltip(help_apply, "The 'Apply' button must be clicked to redraw the figure using the settings above. The 'Reset' button allows you to restore default parameters.")
+        create_tooltip(help_apply, "The 'Apply' button must be clicked each time the settings are changed to redraw the figure using the new settings. The 'Reset' button allows you to restore default figure settings.")
         
         ttk.Button(buttons_frame, text="Save Figure", command=self.save_figure).pack(
             side="left", fill="none", expand=False, padx=(50, 5)
@@ -117,6 +117,8 @@ class BaseVisualizationPage(ttk.Frame, ABC):
         help_save = ttk.Label(buttons_frame, image=self.help_img_tk)
         help_save.pack(side="left")
         create_tooltip(help_save, "This button allows you to export the currently displayed figure as a file. When clicked, a popup will appear to let you choose export parameters such as dimensions and resolution.")
+
+        ttk.Label(buttons_frame, text="developed by Mathias Buff at University of Geneva", foreground="gray", font=("Segoe UI", 8)).pack(side="right", anchor="se")
 
     @abstractmethod
     def create_parameters(self) -> None:

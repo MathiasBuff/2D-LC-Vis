@@ -20,7 +20,7 @@ class OpenExcelDialog(Dialog):
         
         self.manual_text = """Please select a valid Excel file with the "Browse..." button.
 
-The file should contain a sheet with only the data stored in the first two columns, and optionnaly column headers on the first line.
+The file should contain a sheet with only the data (Time, Intensity) stored in the first two columns, and optionnaly column headers on the first line.
 If the columns have headers, please select the "Ignore first line" option.
 
 Then, please select the appropriate sheet and click the "OK" button"""
@@ -140,13 +140,13 @@ class SaveFigureDialog(Dialog):
 
     def __init__(self, parent=None, title: str | None = "Save Figure Parameters"):
         
-        self.manual_text = """Please select the file path with the "Browse..." button.
+        self.manual_text = "Please select the file path with the 'Browse...' button."
+# """
+# You can accept default values as set below or change them manually.
+# The size values correspond to the image size *on print*.
+# Please note that width lower than 12 cm or height lower than 6 cm may lead to problems with figure boundaries.
 
-You can accept default values as set below or change them manually.
-The size values correspond to the image size *on print*.
-Please note that width lower than 12 cm or height lower than 6 cm may lead to problems with figure boundaries.
-
-Once parameters are as wanted, click the "OK" button to save the figure."""
+# Once parameters are as wanted, click the "OK" button to save the figure."""
         
         super().__init__(parent, title=title)
     
@@ -164,8 +164,10 @@ Once parameters are as wanted, click the "OK" button to save the figure."""
 
         # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
+        # windowWidth = 360
+        # windowHeight = 390
         windowWidth = 360
-        windowHeight = 390
+        windowHeight = 200
         screenWidth = master.winfo_screenwidth()
         screenHeight = master.winfo_screenheight()
         xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
@@ -206,20 +208,20 @@ Once parameters are as wanted, click the "OK" button to save the figure."""
         )
         self.path_btn.pack(side="right", fill="none", expand="no", padx=5)
         
-        ttk.Label(size_frame, text="Width x Height [cm]:", anchor="w").pack(
-            side="top", fill="x", expand="no"
-        )
+        # ttk.Label(size_frame, text="Width x Height [cm]:", anchor="w").pack(
+            # side="top", fill="x", expand="no"
+        # )
         self.width_entry = ttk.Entry(size_frame, width=8)
-        self.width_entry.pack(side="left", fill="x", expand="no")
-        ttk.Label(size_frame, text="x").pack(side="left", fill="none", expand="no")
+        # self.width_entry.pack(side="left", fill="x", expand="no")
+        # ttk.Label(size_frame, text="x").pack(side="left", fill="none", expand="no")
         self.height_entry = ttk.Entry(size_frame, width=8)
-        self.height_entry.pack(side="left", fill="x", expand="no")
+        # self.height_entry.pack(side="left", fill="x", expand="no")
         
-        ttk.Label(dpi_frame, text="DPI:", anchor="w", width=5).pack(
-            side="top", fill="x", expand="no"
-        )
+        # ttk.Label(dpi_frame, text="DPI:", anchor="w", width=5).pack(
+            # side="top", fill="x", expand="no"
+        # )
         self.dpi_entry = ttk.Entry(dpi_frame, width=10)
-        self.dpi_entry.pack(side="left", fill="x", expand="no")
+        # self.dpi_entry.pack(side="left", fill="x", expand="no")
         
         self.width_entry.insert(0, "20.0")
         self.height_entry.insert(0, "15.0")

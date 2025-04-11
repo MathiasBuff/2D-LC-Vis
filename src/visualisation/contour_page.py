@@ -100,7 +100,7 @@ class ContourPage(BaseVisualizationPage):
         
         
         help_ctr_colors = ttk.Label(colors_frame, image=self.help_img_tk)
-        create_tooltip(help_ctr_colors, "Colormap: The colors that will be used to represent Intensity values\nExtremes: The color to represent the values outside of the Intensity limits (if set)\nLevels count: Higher count provides better resolution for sharp changes in intensity, but will make image drawing slower.")
+        create_tooltip(help_ctr_colors, "Colormap: The color scale that will be used to represent Intensity values\nExtremes: The colors to represent the values outside the Intensity limits (if set)\nLevels count: Higher count provides better resolution for sharp changes in intensity, but will make image drawing slower. A value of 100 is provided by default.")
         help_ctr_colors.grid(column=0, row=0, sticky="nw")
 
         ttk.Label(colors_frame, text="Colormap", width=15, anchor="w").grid(
