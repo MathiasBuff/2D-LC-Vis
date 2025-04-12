@@ -41,6 +41,11 @@ class AppController:
         self.model = DataManager()
         self.view = MainView(root)
 
+        # Bring to front
+        self.view.lift()
+        self.view.attributes('-topmost', True)
+        self.view.after(500, lambda: self.view.attributes('-topmost', False))
+
         # Bind event handlers to the View's buttons
         self.view.load_btn.config(command=self.on_load_excel_button_click)
         self.view.process_btn.config(command=self.on_process_button_click)
