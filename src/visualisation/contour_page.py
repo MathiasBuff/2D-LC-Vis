@@ -59,8 +59,12 @@ class ContourPage(BaseVisualizationPage):
         d2_frame.grid(column=1, row=1, sticky="nsew", pady=5)
         intensity_frame.grid(column=2, row=1, sticky="nsew", pady=5)
         
+        self.swap_toggle = ttk.Checkbutton(self.param_frame, style="Switch.TCheckbutton", text="Swap Axes")
+        self.swap_toggle.state(["!alternate"])
+        
         zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
         colors_frame.grid(column=1, row=0, sticky="nsew", padx=5)
+        self.swap_toggle.grid(column=0, row=1, sticky="sw")
         
         
         ttk.Label(d1_frame, text="D1 range [min]", width=15, anchor="w").grid(
@@ -212,18 +216,27 @@ class ContourPage(BaseVisualizationPage):
             self.line_count.delete(0, "end")
             self.line_count.insert(0, "100")
 
-        axes.set_xlim(self.parameters["x_min"], self.parameters["x_max"])
-        axes.set_ylim(self.parameters["y_min"], self.parameters["y_max"])
-        axes.set_xlabel("D2 [s]")
-        axes.set_ylabel("D1 [min]")
-
         levels = np.linspace(
             self.parameters["z_min"],
             self.parameters["z_max"],
             int(self.parameters["lines"]),
         )
 
-        cs = axes.contourf(self.data["x"], self.data["y"], self.data["z"], levels, cmap=cmap, extend="both")
+        if self.swap_toggle.instate(["selected"]):
+            axes.set_xlim(self.parameters["x_min"], self.parameters["x_max"])
+            axes.set_ylim(self.parameters["y_min"], self.parameters["y_max"])
+            axes.set_xlabel("D2 [s]")
+            axes.set_ylabel("D1 [min]")
+
+            cs = axes.contourf(self.data["x"], self.data["y"], self.data["z"], levels, cmap=cmap, extend="both")
+        else:
+            axes.set_ylim(self.parameters["x_min"], self.parameters["x_max"])
+            axes.set_xlim(self.parameters["y_min"], self.parameters["y_max"])
+            axes.set_ylabel("D2 [s]")
+            axes.set_xlabel("D1 [min]")
+
+            cs = axes.contourf(self.data["y"], self.data["x"], self.data["z"].transpose(), levels, cmap=cmap, extend="both")
+        
         cbar = self.figure.colorbar(cs)
         cbar.set_label("Intensity", labelpad=-5, y=1.05, rotation="horizontal")
         
