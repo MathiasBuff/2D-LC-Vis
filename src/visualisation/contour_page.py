@@ -59,9 +59,9 @@ class ContourPage(BaseVisualizationPage):
         d2_frame.grid(column=1, row=1, sticky="nsew", pady=5)
         intensity_frame.grid(column=2, row=1, sticky="nsew", pady=5)
         
-        self.swap_toggle = ttk.Checkbutton(self.param_frame, style="Switch.TCheckbutton", text="Swap Axes")
+        self.swap_toggle = ttk.Checkbutton(self.param_frame, style="Switch.TCheckbutton", text="Swap D1/D2 Axes", command=self.update_figure)
         self.swap_toggle.state(["!alternate"])
-        
+         
         zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
         colors_frame.grid(column=1, row=0, sticky="nsew", padx=5)
         self.swap_toggle.grid(column=0, row=1, sticky="sw")
@@ -151,10 +151,10 @@ class ContourPage(BaseVisualizationPage):
         self.line_count.grid(column=3, row=2, padx=(10, 0))
         
         self.cmap_cb.current(self.CMAP_LIST.index(self.parameters["cmap"]))
-        self.cmap_cb.bind("<<ComboboxSelected>>", self.cb_highlight_clear)
         self.color_under_btn.configure(background=self.parameters["color_u"], relief="flat")
         self.color_over_btn.configure(background=self.parameters["color_o"], relief="flat")
-        
+        self.cmap_cb.bind("<<ComboboxSelected>>", self.cb_highlight_clear)
+                
         return super().create_parameters()
 
     def pick_color_extremes(self, extreme: str):
@@ -255,3 +255,4 @@ class ContourPage(BaseVisualizationPage):
       current = self.cmap_cb.get()
       self.cmap_cb.set("")
       self.cmap_cb.set(current)
+      self.update_figure()
