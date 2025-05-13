@@ -17,16 +17,15 @@ class OpenExcelDialog(Dialog):
     """Class to create a Excel File opening dialog."""
 
     def __init__(self, parent=None, title: str | None = "Open Excel File"):
-        
+
         self.manual_text = """Please select a valid Excel file with the "Browse..." button.
 
 The file should contain a sheet with only the data (Time, Intensity) stored in the first two columns, and optionnaly column headers on the first line.
 If the columns have headers, please select the "Ignore first line" option.
 
 Then, please select the appropriate sheet and click the "OK" button"""
-        
+
         super().__init__(parent, title=title)
-        
 
     def body(self, master):
         """create dialog body.
@@ -55,7 +54,7 @@ Then, please select the appropriate sheet and click the "OK" button"""
 
         manual_frame = ttk.Frame(self)
         manual_frame.pack(side="top", expand="yes", fill="both", **paddings)
-        
+
         manual = ttk.Label(
             manual_frame,
             text=self.manual_text,
@@ -132,24 +131,25 @@ Then, please select the appropriate sheet and click the "OK" button"""
         self.path_entry.insert(0, path)
         self.path_entry.state(["disabled"])
         self.path = path
-        sheets = pd.ExcelFile(path).sheet_names
+        sheets = pd.ExcelFile(path, engine="calamine").sheet_names
         self.sheet_cb.configure({"values": sheets})
         self.sheet_cb.current(0)
+
 
 class SaveFigureDialog(Dialog):
 
     def __init__(self, parent=None, title: str | None = "Save Figure Parameters"):
-        
-        self.manual_text = "Please select the file path with the 'Browse...' button."
-# """
-# You can accept default values as set below or change them manually.
-# The size values correspond to the image size *on print*.
-# Please note that width lower than 12 cm or height lower than 6 cm may lead to problems with figure boundaries.
 
-# Once parameters are as wanted, click the "OK" button to save the figure."""
-        
+        self.manual_text = "Please select the file path with the 'Browse...' button."
+        # """
+        # You can accept default values as set below or change them manually.
+        # The size values correspond to the image size *on print*.
+        # Please note that width lower than 12 cm or height lower than 6 cm may lead to problems with figure boundaries.
+
+        # Once parameters are as wanted, click the "OK" button to save the figure."""
+
         super().__init__(parent, title=title)
-    
+
     def body(self, master):
         """create dialog body.
 
@@ -179,7 +179,7 @@ class SaveFigureDialog(Dialog):
 
         manual_frame = ttk.Frame(self)
         manual_frame.pack(side="top", expand="yes", fill="both", **paddings)
-        
+
         manual = ttk.Label(
             manual_frame,
             text=self.manual_text,
@@ -207,22 +207,22 @@ class SaveFigureDialog(Dialog):
             path_frame, text="Browse...", width=10, command=self.ask_file_path
         )
         self.path_btn.pack(side="right", fill="none", expand="no", padx=5)
-        
+
         # ttk.Label(size_frame, text="Width x Height [cm]:", anchor="w").pack(
-            # side="top", fill="x", expand="no"
+        # side="top", fill="x", expand="no"
         # )
         self.width_entry = ttk.Entry(size_frame, width=8)
         # self.width_entry.pack(side="left", fill="x", expand="no")
         # ttk.Label(size_frame, text="x").pack(side="left", fill="none", expand="no")
         self.height_entry = ttk.Entry(size_frame, width=8)
         # self.height_entry.pack(side="left", fill="x", expand="no")
-        
+
         # ttk.Label(dpi_frame, text="DPI:", anchor="w", width=5).pack(
-            # side="top", fill="x", expand="no"
+        # side="top", fill="x", expand="no"
         # )
         self.dpi_entry = ttk.Entry(dpi_frame, width=10)
         # self.dpi_entry.pack(side="left", fill="x", expand="no")
-        
+
         self.width_entry.insert(0, "20.0")
         self.height_entry.insert(0, "15.0")
         self.dpi_entry.insert(0, "300")
@@ -263,10 +263,10 @@ class SaveFigureDialog(Dialog):
         path = Path(
             asksaveasfilename(
                 filetypes=[
-                    ('.png', '*.png'),
-                    ('.tiff', '*.tiff'),
-                    ('.svg', '*.svg'),
-                    ('.pdf', '*.pdf'),
+                    (".png", "*.png"),
+                    (".tiff", "*.tiff"),
+                    (".svg", "*.svg"),
+                    (".pdf", "*.pdf"),
                 ],
                 defaultextension=".png",
             )
@@ -277,10 +277,12 @@ class SaveFigureDialog(Dialog):
         self.path_entry.state(["disabled"])
         self.path = path
 
+
 def ask_file() -> dict:
     """get file parameters (path, sheetname, has_headers) from the user"""
     l = OpenExcelDialog()
     return l.result
+
 
 def ask_save_parameters() -> dict:
     """get figure save parameters from the user"""

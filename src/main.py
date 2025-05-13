@@ -3,20 +3,10 @@
 import logging
 import sys
 import tkinter as tk
-import ctypes
 from pathlib import Path
 from tkinter import ttk
 
 from controller import AppController
-
-def set_app_icon(hwnd, icon_path):
-    # Load the icon
-    icon = ctypes.windll.user32.LoadImageW(
-        0, ctypes.c_wchar_p(icon_path), 1, 0, 0, 0x00000010  # IMAGE_ICON = 1, LR_LOADFROMFILE = 0x10
-    )
-    # Send the icon to the window
-    ctypes.windll.user32.SendMessageW(hwnd, 0x80, 0, icon)  # WM_SETICON = 0x80
-    ctypes.windll.user32.SendMessageW(hwnd, 0x80, 1, icon)  # For small icon too
 
 
 def main():
@@ -52,7 +42,6 @@ def main():
     except Exception as e:
         logger.warning(f"Failed to apply theme: {e}")
         root.style.theme_use(None)
-    # root.iconbitmap(default=icon_path)
 
     # Launch the main window of the application
     logger.info("Starting up application.\n")
@@ -70,10 +59,6 @@ def main():
 
     # Set normal window icon
     root.iconbitmap(icon_path, default=icon_path)
-
-    # # Set taskbar icon via ctypes
-    # hwnd = ctypes.windll.user32.GetAncestor(root.winfo_id(), 2)  # GA_ROOT = 2
-    # set_app_icon(hwnd, str(icon_path.absolute()))
 
     root.mainloop()
 

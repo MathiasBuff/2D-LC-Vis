@@ -13,46 +13,45 @@ logger = logging.getLogger(__name__)
 
 class RawPage(BaseVisualizationPage):
 
-    def __init__(self, master):     
+    def __init__(self, master):
         super().__init__(master)
-                
+
         self.create_parameters()
-        
+
         self.data = {
             "x": np.array([0, 1]),
             "y": np.array([0, 1]),
         }
         self.update_figure()
-        
+
     def create_parameters(self):
-        
+
         zoom_frame = ttk.Labelframe(self.param_frame, text="Zoom")
-        
+
         d1_frame = ttk.Frame(zoom_frame, padding=(10, 0))
         intensity_frame = ttk.Frame(zoom_frame, padding=(10, 0))
-        
+
         help_raw_zoom = ttk.Label(zoom_frame, image=self.help_img_tk)
-        create_tooltip(help_raw_zoom, "Time range: Set limits of the Time axis\nIntensity range: Set limits of the Intensity axis")
-        
+        create_tooltip(
+            help_raw_zoom,
+            "Time range: Set limits of the Time axis\nIntensity range: Set limits of the Intensity axis",
+        )
+
         zoom_frame.grid(column=0, row=0, sticky="nsew", padx=5)
-        
+
         help_raw_zoom.grid(column=0, row=0, sticky="nw", padx=5)
         d1_frame.grid(column=0, row=1, sticky="nsew", pady=5)
         intensity_frame.grid(column=1, row=1, sticky="nsew", pady=5)
-        
-                
+
         ttk.Label(d1_frame, text="Time range [min]", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
         self.x_min = ttk.Entry(d1_frame, width=7)
         self.x_min.grid(column=0, row=1)
-        ttk.Label(d1_frame, text="-", width=2, anchor="center").grid(
-            column=1, row=1
-        )
+        ttk.Label(d1_frame, text="-", width=2, anchor="center").grid(column=1, row=1)
         self.x_max = ttk.Entry(d1_frame, width=7)
         self.x_max.grid(column=2, row=1)
-                
-        
+
         ttk.Label(intensity_frame, text="Intensity range", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
@@ -63,24 +62,24 @@ class RawPage(BaseVisualizationPage):
         )
         self.y_max = ttk.Entry(intensity_frame, width=7)
         self.y_max.grid(column=2, row=1)
-                
+
         return super().create_parameters()
 
     def read_parameters(self):
-        
+
         try:
-           self.parameters["x_max"] = self.try_float(self.x_max.get())
-           self.parameters["x_min"] = self.try_float(self.x_min.get())
-           self.parameters["y_min"] = self.try_float(self.y_min.get())
-           self.parameters["y_max"] = self.try_float(self.y_max.get())
-                      
-           return super().read_parameters()
+            self.parameters["x_max"] = self.try_float(self.x_max.get())
+            self.parameters["x_min"] = self.try_float(self.x_min.get())
+            self.parameters["y_min"] = self.try_float(self.y_min.get())
+            self.parameters["y_max"] = self.try_float(self.y_max.get())
+
+            return super().read_parameters()
         except ValueError as e:
             logger.error(f"Invalid input : {e}")
         return
 
     def draw_axes(self):
-        
+
         self.figure.add_subplot()
         self.figure.subplots_adjust(0.1, 0.2, 0.9, 0.9)
         axes = self.figure.axes[0]

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
-import sys
 import logging
+import sys
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import ttk
+
 from PIL import Image, ImageTk
 
 from visualisation.contour_page import ContourPage
-from visualisation.xyz_page import XYZPage
 from visualisation.overlay_page import OverlayPage
 from visualisation.raw_page import RawPage
+from visualisation.xyz_page import XYZPage
 
 # Handle case where app is running as executable
 if getattr(sys, "frozen", False):
@@ -20,7 +21,8 @@ else:
 
 # Log to root logger
 logger = logging.getLogger()
-help_img = Image.open(f"{base_path}\\utils\\help.png").resize((16,16))
+help_img = Image.open(f"{base_path}\\utils\\help.png").resize((16, 16))
+
 
 class TextHandler(logging.Handler):
     """
@@ -83,9 +85,16 @@ class ToolTip(object):
         self.tipwindow = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(1)
         tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(tw, text=self.text, justify="left", wraplength=300,
-                      background="#ffffe0", relief="solid", borderwidth=1,
-                      font=("tahoma", "8", "normal"))
+        label = tk.Label(
+            tw,
+            text=self.text,
+            justify="left",
+            wraplength=300,
+            background="#ffffe0",
+            relief="solid",
+            borderwidth=1,
+            font=("tahoma", "8", "normal"),
+        )
         label.pack(ipadx=1)
 
     def hidetip(self):
@@ -94,14 +103,19 @@ class ToolTip(object):
         if tw:
             tw.destroy()
 
+
 def create_tooltip(widget, text):
     toolTip = ToolTip(widget)
+
     def enter(event):
         toolTip.showtip(text)
+
     def leave(event):
         toolTip.hidetip()
-    widget.bind('<Enter>', enter)
-    widget.bind('<Leave>', leave)
+
+    widget.bind("<Enter>", enter)
+    widget.bind("<Leave>", leave)
+
 
 class MainView(tk.Toplevel):
     """
@@ -157,7 +171,6 @@ class MainView(tk.Toplevel):
         # base = ContourPage(self.output_note)
         # base.pack(expand=True, fill="both")
         # self.output_note.add(base, text="Contour Subclass")
-        
 
     def setup_window(self) -> None:
         """
@@ -307,8 +320,8 @@ class MainView(tk.Toplevel):
 Tip for adjustments: if you notice that the data points at the dead volume region in 2D appear shifted or misaligned, you can fine-tune the sampling time slightly until the alignment looks correct.
 
 For Agilent users: the data acquisition software displays the sampling time in minutes by default. However, if you hover your mouse over the value, the exact value in seconds appears. The recommendation is to manually convert the accurate time in seconds back into minutes. This is important because the rounded value shown in minutes can sometimes lack precision, particularly when active solvent modulation is used.
-"""
-            )
+""",
+        )
 
         # Blank Subtraction Frame
         blank_frame = ttk.Frame(self.calc_frame)
@@ -321,13 +334,16 @@ For Agilent users: the data acquisition software displays the sampling time in m
             help_blk,
             """When this checkbox is selected, the tool will use the 2D chromatogram corresponding to the 1D time you specify in the input box as a blank.
 This blank chromatogram will then be subtracted from all other 2D chromatograms during the processing.
-"""
-            )
+""",
+        )
 
         # Process Data Button
         self.process_btn = ttk.Button(self.calc_frame, text="Process Data")
         help_prc = ttk.Label(self.calc_frame, image=self.help_img_tk)
-        create_tooltip(help_prc, "This button processes the raw data currently loaded with the parameters above. If you change the parameters, please click this button again to reprocess the data.")
+        create_tooltip(
+            help_prc,
+            "This button processes the raw data currently loaded with the parameters above. If you change the parameters, please click this button again to reprocess the data.",
+        )
 
         # Layout configuration for input fields and controls
         layout_config = [
@@ -338,7 +354,7 @@ This blank chromatogram will then be subtracted from all other 2D chromatograms 
                     "expand": False,
                     "fill": "none",
                 },
-            },            
+            },
             {
                 "widget": blank_frame,
                 "pack": {
@@ -397,7 +413,9 @@ This blank chromatogram will then be subtracted from all other 2D chromatograms 
                 },
             },
             {
-                "widget": ttk.Label(blank_frame, text="Blank Substraction [min]", anchor="w"),
+                "widget": ttk.Label(
+                    blank_frame, text="Blank Substraction [min]", anchor="w"
+                ),
                 "grid": {
                     "row": 0,
                     "column": 1,
