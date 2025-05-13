@@ -83,7 +83,3 @@ Special thanks to:
 
 - **D. Guillarme** and **M. Aebischer** for their guidance and expertise.
 - The **University of Geneva** for supporting this project.
-
----
-
-Let me know if you'd like to add, modify, or remove any sections!
