@@ -8,7 +8,6 @@ from tkinter import ttk
 
 from controller import AppController
 
-
 def main():
     """
     Entry point for the application.
@@ -45,7 +44,7 @@ def main():
 
     # Launch the main window of the application
     logger.info("Starting up application.\n")
-    AppController(root)
+    controller = AppController(root)
 
     # Close the splash image once everything is loaded
     try:

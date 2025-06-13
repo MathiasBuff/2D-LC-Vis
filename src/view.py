@@ -151,7 +151,7 @@ class MainView(tk.Toplevel):
         # Build the window layout and initialize components
         self.body()
 
-        logger.info("2D-LC Visualizer version 0.3.2")
+        logger.info("2D-LC Visualizer version 1.0.0")
         logger.info("-" * 42)
 
         # Bind exit events for closing the application

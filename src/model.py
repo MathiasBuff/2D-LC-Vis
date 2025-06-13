@@ -36,7 +36,7 @@ class DataManager:
             ValueError: If the sheet name is not found or data is invalid.
         """
 
-        logging.info(f"Loading data from sheet '{sheet}'...")
+        logger.info(f"Loading data from sheet '{sheet}'...")
 
         # Set header row index based on user choice
         h = 0 if headers else None
@@ -44,7 +44,7 @@ class DataManager:
         # Load data as a NumPy array using calamine engine for compatibility
         self.data = np.array(pd.read_excel(path, sheet, header=h, engine="calamine"))
 
-        logging.info("Data successfully loaded.")
+        logger.info("Data successfully loaded.")
 
     def process(
         self, sampling_time: float, blank_time: float = None, callback: callable = None
@@ -74,7 +74,7 @@ class DataManager:
         if blank_time:
             self.subtract_blank(blank_time)
 
-        logging.info("Processing complete.")
+        logger.info("Processing complete.")
 
         # Trigger callback if provided
         if callback:
@@ -93,15 +93,16 @@ class DataManager:
                 - time_column_D2 (np.ndarray): Time vector for the second dimension (D2).
         """
 
-        logging.info("\nConstructing time vectors...")
+        logger.info("\nConstructing time vectors...")
 
         # Calculate time increments and frequency
         x_start, x_end = self.data[:, 0][0], self.data[:, 0][-1]
         delta = (x_end - x_start) / (len(self.data[:, 0]) - 1)
         frequency = 1 / (60 * delta)  # Hz
 
-        logging.info(
-            f"Sampling time: {sampling_time:.4f} min  --  Frequency: {frequency:.4f} Hz"
+        logger.info(
+            f"Sampling time: {sampling_time:.4f} min\n\
+Frequency: {frequency:.4f} Hz"
         )
 
         # Construct the time vector for D2 (second dimension)
@@ -113,7 +114,7 @@ class DataManager:
             start=0, stop=x_end - (2 * sampling_time), step=sampling_time
         )
 
-        logging.info(
+        logger.debug(
             f"Number of points along D1: {len(time_column_D1)}\n\
 Number of points along D2: {len(time_column_D2)}"
         )
@@ -128,7 +129,7 @@ Number of points along D2: {len(time_column_D2)}"
             np.ndarray: 2D matrix of reshaped data values.
         """
 
-        logging.info(f"Reshaping values into 2D matrix...")
+        logger.info(f"Reshaping values into 2D matrix...")
 
         # Calculate sampling frequency and time step
         frequency = 60 / self.ax_D2[1]
@@ -146,7 +147,7 @@ Number of points along D2: {len(time_column_D2)}"
         # Stack columns to form the 2D value matrix
         matrix = np.vstack(cols)
 
-        logging.info(f"Values reshaped into {matrix.shape}.")
+        logger.debug(f"Values reshaped into {matrix.shape}.")
 
         return matrix
 
@@ -165,7 +166,7 @@ Number of points along D2: {len(time_column_D2)}"
         # Find the index corresponding to the blank time
         blank_line = np.where(self.ax_D1 <= blank_time)[0][-1]
 
-        logging.info(f"Substracting data at {self.ax_D1[blank_line]:.4f} min.")
+        logger.info(f"Substracting data at {self.ax_D1[blank_line]:.4f} min.")
 
         # Subtract the blank line from the entire matrix
         self.value_matrix = self.value_matrix - self.value_matrix[blank_line, :]

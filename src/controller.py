@@ -158,9 +158,11 @@ class AppController:
         """
 
         logger.info("\nDrawing figures...")
+        
+        self.threads = []
 
         # Draw the 2D Contour Plot
-        run_in_thread(
+        self.threads.append(run_in_thread(
             draw_figure,
             self.view.contour_page,
             {
@@ -169,10 +171,10 @@ class AppController:
                 "z": self.model.value_matrix,
             },
             "Contour",
-        )
+        ))
 
         # Draw the 3D Contour Plot
-        run_in_thread(
+        self.threads.append(run_in_thread(
             draw_figure,
             self.view.xyz_page,
             {
@@ -181,10 +183,10 @@ class AppController:
                 "z": self.model.value_matrix,
             },
             "3D",
-        )
+        ))
 
         # Draw the Overlay Plot
-        run_in_thread(
+        self.threads.append(run_in_thread(
             draw_figure,
             self.view.overlay_page,
             {
@@ -193,16 +195,25 @@ class AppController:
                 "z": self.model.value_matrix,
             },
             "Overlay",
-        )
+        ))
 
         # Draw the Raw Data Plot
-        run_in_thread(
+        self.threads.append(run_in_thread(
             draw_figure,
             self.view.raw_page,
             {"x": self.model.data[:, 0], "y": self.model.data[:, 1]},
             "Raw",
+        ))
+
+        run_in_thread(
+            self.check_drawings_done,
         )
 
+    def check_drawings_done(self):
+            if all(not t.is_alive() for t in self.threads):
+                logger.info("All figures drawn.")
+            else:
+                self.view.after(500, self.check_drawings_done)
 
 def run_in_thread(target, *args):
     """
@@ -213,7 +224,9 @@ def run_in_thread(target, *args):
         *args: Arguments to pass to the target function.
     """
 
-    threading.Thread(target=target, args=args).start()
+    t = threading.Thread(target=target, args=args)
+    t.start()
+    return t
 
 
 def draw_figure(page, data: dict, name: str = "") -> None:
@@ -228,7 +241,7 @@ def draw_figure(page, data: dict, name: str = "") -> None:
 
     page.data = data
     page.update_figure()
-    logger.info(f"{name} figure complete.")
+    logger.debug(f"{name} figure complete.")
 
 
 def freeze_buttons(widget: tk.Tk | tk.Toplevel, duration: int = 1) -> None:

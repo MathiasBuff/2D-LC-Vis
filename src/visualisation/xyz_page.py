@@ -205,6 +205,8 @@ class XYZPage(BaseVisualizationPage):
         axes.set_ylabel("D1 [min]")
         axes.set_zlabel("Intensity")
 
+        axes.view_init(elev=25, azim=245)
+
         levels = np.linspace(
             self.parameters["z_min"],
             self.parameters["z_max"],

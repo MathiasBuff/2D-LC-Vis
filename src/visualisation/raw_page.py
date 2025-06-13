@@ -43,7 +43,7 @@ class RawPage(BaseVisualizationPage):
         d1_frame.grid(column=0, row=1, sticky="nsew", pady=5)
         intensity_frame.grid(column=1, row=1, sticky="nsew", pady=5)
 
-        ttk.Label(d1_frame, text="Time range [min]", width=15, anchor="w").grid(
+        ttk.Label(d1_frame, text="D1 range [min]", width=15, anchor="w").grid(
             column=0, row=0, columnspan=3, sticky="new"
         )
         self.x_min = ttk.Entry(d1_frame, width=7)
@@ -95,7 +95,7 @@ class RawPage(BaseVisualizationPage):
 
         axes.set_xlim(self.parameters["x_min"], self.parameters["x_max"])
         axes.set_ylim(self.parameters["y_min"], self.parameters["y_max"])
-        axes.set_xlabel("Time [min]")
+        axes.set_xlabel("D1 [min]")
         axes.set_ylabel("Intensity")
 
         axes.plot(self.data["x"], self.data["y"])

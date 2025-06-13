@@ -18,7 +18,7 @@ class OpenExcelDialog(Dialog):
 
     def __init__(self, parent=None, title: str | None = "Open Excel File"):
 
-        self.manual_text = """Please select a valid Excel file with the "Browse..." button.
+        self.manual_text = """Please select a valid Excel file with the "Browse..." button. The file should be closed before opening it in the application.
 
 The file should contain a sheet with only the data (Time, Intensity) stored in the first two columns, and optionnaly column headers on the first line.
 If the columns have headers, please select the "Ignore first line" option.
@@ -42,7 +42,7 @@ Then, please select the appropriate sheet and click the "OK" button"""
         # self.iconbitmap(default=Path(base_path, "utils", "unige-icon.ico"))
 
         windowWidth = 360
-        windowHeight = 425
+        windowHeight = 460
         screenWidth = master.winfo_screenwidth()
         screenHeight = master.winfo_screenheight()
         xCoordinate = int((screenWidth / 2) - (windowWidth / 2))
