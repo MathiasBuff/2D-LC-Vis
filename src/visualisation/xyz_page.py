@@ -188,15 +188,20 @@ class XYZPage(BaseVisualizationPage):
             self.line_count.delete(0, "end")
             self.line_count.insert(0, "100")
 
-        self.data["x"] = self.data["x"][self.data["x"] <= self.parameters["x_max"]]
-        self.data["z"] = self.data["z"][:, : len(self.data["x"])]
-        self.data["x"] = self.data["x"][self.data["x"] >= self.parameters["x_min"]]
-        self.data["z"] = self.data["z"][:, -len(self.data["x"]) :]
 
-        self.data["y"] = self.data["y"][self.data["y"] <= self.parameters["y_max"]]
-        self.data["z"] = self.data["z"][: len(self.data["y"])]
-        self.data["y"] = self.data["y"][self.data["y"] >= self.parameters["y_min"]]
-        self.data["z"] = self.data["z"][-len(self.data["y"]) :]
+        # Since we need to crop data in 3d projection, we copy
+        # it first to avoid modifying the original data
+        data = self.data.copy()
+
+        data["x"] = data["x"][data["x"] <= self.parameters["x_max"]]
+        data["z"] = data["z"][:, : len(data["x"])]
+        data["x"] = data["x"][data["x"] >= self.parameters["x_min"]]
+        data["z"] = data["z"][:, -len(data["x"]) :]
+
+        data["y"] = data["y"][data["y"] <= self.parameters["y_max"]]
+        data["z"] = data["z"][: len(data["y"])]
+        data["y"] = data["y"][data["y"] >= self.parameters["y_min"]]
+        data["z"] = data["z"][-len(data["y"]) :]
 
         axes.set_xlim(self.parameters["x_min"], self.parameters["x_max"])
         axes.set_ylim(self.parameters["y_min"], self.parameters["y_max"])
@@ -214,7 +219,7 @@ class XYZPage(BaseVisualizationPage):
         )
 
         cs = axes.contour(
-            self.data["x"], self.data["y"], self.data["z"], levels, cmap=cmap
+            data["x"], data["y"], data["z"], levels, cmap=cmap
         )
         cbar = self.figure.colorbar(cs, pad=0.1)
         cbar.set_label("Intensity", labelpad=-5, y=1.05, rotation="horizontal")
