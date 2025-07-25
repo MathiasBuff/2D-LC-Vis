@@ -73,6 +73,9 @@ class DataManager:
         # Perform blank subtraction if blank_time is specified
         if blank_time:
             self.subtract_blank(blank_time)
+        
+        self.mesh = np.concat((self.ax_D1.reshape((-1, 1)), self.value_matrix), axis=1)
+        self.mesh = np.concat((np.concat((np.array([" "]), self.ax_D2), axis=0).reshape((1, -1)), self.mesh), axis=0)
 
         logger.info("Processing complete.")
 

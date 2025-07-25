@@ -497,6 +497,7 @@ This blank chromatogram will then be subtracted from all other 2D chromatograms 
         self.xyz_page = XYZPage(self.output_note)
         self.overlay_page = OverlayPage(self.output_note)
         self.raw_page = RawPage(self.output_note)
+        # self.matrix_page = ttk.Frame(self.output_note)
 
         # Layout configuration for each page
         layout_config = [
@@ -528,6 +529,13 @@ This blank chromatogram will then be subtracted from all other 2D chromatograms 
                     "fill": "both",
                 },
             },
+            # {
+            #     "widget": self.matrix_page,
+            #     "pack": {
+            #         "expand": True,
+            #         "fill": "both",
+            #     },
+            # },
         ]
 
         # Place the widgets using the place_widgets() utility method
@@ -538,6 +546,20 @@ This blank chromatogram will then be subtracted from all other 2D chromatograms 
         self.output_note.add(self.xyz_page, text="3D Contour")
         self.output_note.add(self.overlay_page, text="Overlay")
         self.output_note.add(self.raw_page, text="Raw")
+
+        # self.output_note.add(self.matrix_page, text="Cuts Matrix")
+
+        # self.matrix_text = tk.Text(self.matrix_page, wrap="none")
+        # self.matrix_text.configure(font="Calibri")
+        # self.matrix_text.grid(row=0, column=0, sticky="nsew")
+        # xsb = tk.Scrollbar(self.matrix_page, orient="horizontal", command=self.matrix_text.xview)
+        # self.matrix_text.configure(xscrollcommand=xsb.set)
+        # xsb.grid(row=2, column=0, columnspan=100, sticky="ew")
+        # ysb = tk.Scrollbar(self.matrix_page, orient="vertical", command=self.matrix_text.yview)
+        # self.matrix_text.configure(yscrollcommand=ysb.set)
+        # ysb.grid(row=0, column=2, rowspan=100, sticky="ns")
+        # self.matrix_page.rowconfigure(0, weight=1)
+        # self.matrix_page.columnconfigure(0, weight=1)
 
     def on_exit(self, event=None) -> None:
         """

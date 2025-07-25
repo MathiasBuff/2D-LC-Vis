@@ -125,7 +125,7 @@ class AppController:
             blank_time = None
 
         # Start data processing in a separate thread to keep UI responsive
-        run_in_thread(
+        t = run_in_thread(
             self.model.process,
             sampling_time,
             blank_time,
@@ -137,6 +137,20 @@ class AppController:
             freeze_buttons,
             self.view,
         )
+    
+    def print_matrix(self) -> None:
+        self.view.matrix_text.delete(1.0, tk.END)
+        try:
+            for i in self.model.mesh:
+                for j in i:
+                    try:
+                        self.view.matrix_text.insert(tk.END, "{:.3f}\t".format(float(j)))
+                    except ValueError:
+                        self.view.matrix_text.insert(tk.END, f"{j}\t")
+                self.view.matrix_text.insert(tk.END, "\n")
+        except AttributeError:
+            logger.error("No data loaded to print matrix.")
+            self.view.matrix_text.insert(tk.END, "No data loaded.")
 
     def draw_figures(self) -> None:
         """
@@ -216,6 +230,7 @@ class AppController:
     def check_drawings_done(self):
             if all(not t.is_alive() for t in self.threads):
                 logger.info("All figures drawn.")
+                # self.print_matrix()
             else:
                 self.view.after(500, self.check_drawings_done)
 
