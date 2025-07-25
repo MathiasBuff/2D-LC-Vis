@@ -38,6 +38,7 @@ class AppController:
         Args:
             root (tk.Tk): The root Tkinter window instance.
         """
+        self.root = root
         self.model = DataManager()
         self.view = MainView(root)
 
@@ -49,6 +50,7 @@ class AppController:
         # Bind event handlers to the View's buttons
         self.view.load_btn.config(command=self.on_load_excel_button_click)
         self.view.process_btn.config(command=self.on_process_button_click)
+        self.view.export_btn.config(command=self.on_export_button_click)
 
     def on_load_excel_button_click(self) -> None:
         """
@@ -125,7 +127,7 @@ class AppController:
             blank_time = None
 
         # Start data processing in a separate thread to keep UI responsive
-        t = run_in_thread(
+        run_in_thread(
             self.model.process,
             sampling_time,
             blank_time,
@@ -137,6 +139,20 @@ class AppController:
             freeze_buttons,
             self.view,
         )
+    
+    def on_export_button_click(self) -> None:
+        
+        export = "↓D1  D2→"
+        try:
+            for i in self.model.mesh:
+                for j in i:
+                    export += f"{j}\t"
+                export += "\n"
+            self.root.clipboard_clear()
+            self.root.clipboard_append(export)
+            logger.info("Cuts matrix copied to clipboard.")
+        except AttributeError:
+            logger.error("No data loaded to print matrix.")
     
     def print_matrix(self) -> None:
         self.view.matrix_text.delete(1.0, tk.END)

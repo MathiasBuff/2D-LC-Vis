@@ -223,6 +223,7 @@ class MainView(tk.Toplevel):
 
         # Initialize main navigation components
         self.load_btn = ttk.Button(self, text="Load Excel File")
+        self.export_btn = ttk.Button(self, text="Export Cuts Matrix")
 
         self.calc_frame = ttk.Labelframe(self, text="Calculation Conditions")
         self.output_note = ttk.Notebook(self)
@@ -247,18 +248,26 @@ class MainView(tk.Toplevel):
                 },
             },
             {
+                "widget": self.export_btn,
+                "grid": {
+                    "row": 2,
+                    "column": 0,
+                    "sticky": "nsew",
+                },
+            },
+            {
                 "widget": self.output_note,
                 "grid": {
                     "row": 0,
                     "column": 2,
-                    "rowspan": 3,
+                    "rowspan": 4,
                     "sticky": "nsew",
                 },
             },
             {
                 "widget": self.console_frame,
                 "grid": {
-                    "row": 2,
+                    "row": 3,
                     "column": 0,
                     "sticky": "nsew",
                 },
@@ -278,7 +287,7 @@ class MainView(tk.Toplevel):
         self.place_widgets(layout_config)
 
         # Configure row and column weights for responsive resizing
-        row_weights = [0, 0, 1]
+        row_weights = [0, 0, 0, 1]
         column_weights = [0, 0, 1]
 
         for n, rw in enumerate(row_weights):
