@@ -201,7 +201,11 @@ class AppController:
         self.threads.append(run_in_thread(
             draw_figure,
             self.view.raw_page,
-            {"x": self.model.data[:, 0], "y": self.model.data[:, 1]},
+            {
+                "x": self.model.data[:, 0][:len(self.model.value_matrix.copy().reshape(-1))],
+                "y": self.model.value_matrix.copy().reshape(-1),
+                "marks": self.model.ax_D1,
+            },
             "Raw",
         ))
 

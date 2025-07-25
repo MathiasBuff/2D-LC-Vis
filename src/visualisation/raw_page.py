@@ -21,6 +21,7 @@ class RawPage(BaseVisualizationPage):
         self.data = {
             "x": np.array([0, 1]),
             "y": np.array([0, 1]),
+            "marks": np.array([0.5]),
         }
         self.update_figure()
 
@@ -63,6 +64,15 @@ class RawPage(BaseVisualizationPage):
         self.y_max = ttk.Entry(intensity_frame, width=7)
         self.y_max.grid(column=2, row=1)
 
+        self.sampling_toggle = ttk.Checkbutton(
+            self.param_frame,
+            style="Switch.TCheckbutton",
+            text="Injection marks",
+            command=self.update_figure,
+        )
+        self.sampling_toggle.state(["!alternate"])
+        self.sampling_toggle.grid(column=1, row=0, sticky="nw", padx=5, pady=5)
+
         return super().create_parameters()
 
     def read_parameters(self):
@@ -72,6 +82,7 @@ class RawPage(BaseVisualizationPage):
             self.parameters["x_min"] = self.try_float(self.x_min.get())
             self.parameters["y_min"] = self.try_float(self.y_min.get())
             self.parameters["y_max"] = self.try_float(self.y_max.get())
+            self.parameters["sampling"] = self.sampling_toggle.instate(["selected"])
 
             return super().read_parameters()
         except ValueError as e:
@@ -99,5 +110,10 @@ class RawPage(BaseVisualizationPage):
         axes.set_ylabel("Intensity")
 
         axes.plot(self.data["x"], self.data["y"])
+        
+        if self.parameters["sampling"]:
+            # Draw vertical lines for injection marks
+            for mark in self.data["marks"]:
+                axes.axvline(mark, color="lightgray", linestyle="--", linewidth=0.5)
 
         return super().draw_axes()
